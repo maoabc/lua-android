@@ -41,8 +41,10 @@ set(SRC_FILES
 
         )
 
-add_definitions(-DLUA_USE_C99 -Wall -Wextra -DLUA_COMPAT_5_3)
+add_definitions(-DLUA_USE_C99 -Wall -Wextra)
 
 add_library(lua_static STATIC ${SRC_FILES})
+
+target_include_directories(lua_static PUBLIC src)
 
 target_link_libraries(lua_static)
