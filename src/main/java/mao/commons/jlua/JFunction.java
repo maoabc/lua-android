@@ -1,5 +1,5 @@
 package mao.commons.jlua;
 
 interface JFunction {
-    int call(long luaState);
+    int call(long luaState) throws Throwable;
 }

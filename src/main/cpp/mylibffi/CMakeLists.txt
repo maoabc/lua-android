@@ -6,7 +6,6 @@ cmake_minimum_required(VERSION 3.10.2)
 set(out ${CMAKE_CURRENT_BINARY_DIR})
 
 set(LIB_FFI_SRCS
-#        libffi/src/dlmalloc.c
         libffi/src/closures.c
         libffi/src/debug.c
 #        libffi/src/java_raw_api.c

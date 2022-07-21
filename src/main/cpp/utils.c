@@ -24,7 +24,7 @@ JNIEnv *getJNIEnv() {
 
 static jclass IOExceptionClass;
 static jclass LuaExceptionClass;
-static jmethodID funcCall;
+
 
 
 void throw_by_name(JNIEnv *env, const char *name, const char *msg) {
@@ -49,10 +49,6 @@ void throw_LuaException(JNIEnv *env, const char *msg) {
     (*env)->ThrowNew(env, LuaExceptionClass, msg);
 }
 
-int call_JavaFunction(JNIEnv *env, jobject obj, jlong luaState) {
-    return (*env)->CallIntMethod(env, obj, funcCall, luaState);
-}
-
 
 void init_ids(JNIEnv *env) {
 
@@ -63,8 +59,12 @@ void init_ids(JNIEnv *env) {
 
 
     jclass funcCls = (*env)->FindClass(env, "mao/commons/jlua/JFunction");
-    funcCall = (*env)->GetMethodID(env, funcCls, "call", "(J)I");
+    funcCallMethodId = (*env)->GetMethodID(env, funcCls, "call", "(J)I");
     (*env)->DeleteLocalRef(env, funcCls);
+
+    jclass throwableCls = (*env)->FindClass(env, "java/lang/Throwable");
+    toStringMethodId = (*env)->GetMethodID(env, throwableCls, "toString", "()Ljava/lang/String;");
+    (*env)->DeleteLocalRef(env, throwableCls);
 }
 
 

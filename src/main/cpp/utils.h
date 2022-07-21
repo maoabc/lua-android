@@ -29,7 +29,6 @@ void throw_IOException(JNIEnv *env, const char *msg);
 
 void throw_LuaException(JNIEnv *env, const char *msg);
 
-int call_JavaFunction(JNIEnv *env, jobject obj, jlong luaState);
 
 
 #define  ALOGI(...)  __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
@@ -37,6 +36,8 @@ int call_JavaFunction(JNIEnv *env, jobject obj, jlong luaState);
 #define  ALOGD(...)  __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
 #define  ALOGW(...)  __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
 
+jmethodID funcCallMethodId;
+jmethodID toStringMethodId;
 
 #ifdef __cplusplus
 }

@@ -1,18 +1,17 @@
 package mao.commons.jlua;
 
+import androidx.annotation.NonNull;
+
 import java.io.Closeable;
 
 public class LuaState implements Closeable {
 
-    static {
-        System.loadLibrary("jlua");
-    }
 
     private long ptr;
     private final boolean needRelease;
 
     private LuaState() {
-        this.ptr = newState0();
+        this.ptr = LuaJNI.newState0();
         needRelease = true;
     }
 
@@ -25,28 +24,112 @@ public class LuaState implements Closeable {
         return new LuaState();
     }
 
-    public static LuaState wrap(long ptr) {
+    static LuaState wrap(long ptr) {
         return new LuaState(ptr);
     }
 
     public int checkInteger(int arg) {
-        return checkInteger0(ptr, arg);
+        return LuaJNI.checkInteger0(ptr, arg);
     }
 
     public void pushClosure(CJFunction function, int n) {
-        pushClosure0(ptr, function.getCFunction(), n);
+        LuaJNI.pushClosure0(ptr, function.getCFunction(), n);
+    }
+
+    public void pushFunction(CJFunction function) {
+        LuaJNI.pushClosure0(ptr, function.getCFunction(), 0);
     }
 
     public void pushInteger(int i) {
-        pushInteger0(ptr, i);
+        LuaJNI.pushInteger0(ptr, i);
     }
 
     public int toInteger(int idx) {
-        return toInteger0(ptr, idx);
+        return LuaJNI.toInteger0(ptr, idx);
     }
 
     public void call(int nargs, int nresults) {
-        call0(ptr, nargs, nresults);
+        LuaJNI.call0(ptr, nargs, nresults);
+    }
+
+    public void pushJavaObject(Object obj) {
+        LuaJNI.pushJavaObject0(ptr, obj);
+    }
+
+    public Object toJavaObject(int idx) {
+        return LuaJNI.toJavaObject0(ptr, idx);
+    }
+
+    public Object checkJavaObject(int idx) {
+        return LuaJNI.checkJavaObject0(ptr, idx);
+    }
+
+    public void pushString(@NonNull String str) {
+        LuaJNI.pushString0(ptr, str);
+    }
+
+    public boolean isString(int idx) {
+        return LuaJNI.isString0(ptr, idx);
+    }
+
+    public String checkLString(int arg) {
+        return LuaJNI.checkLString0(ptr, arg);
+    }
+
+    public void error() {
+        LuaJNI.error0(ptr);
+    }
+
+    public String toLString(int idx) {
+        return LuaJNI.toLString0(ptr, idx);
+    }
+
+    public void setTop(int idx) {
+        LuaJNI.setTop0(ptr, idx);
+    }
+
+    public void pop(int n) {
+        LuaJNI.setTop0(ptr, -n - 1);
+    }
+
+    public int getTop() {
+        return LuaJNI.getTop0(ptr);
+    }
+
+    public boolean isJavaObject(int idx) {
+        return LuaJNI.isJavaObject0(ptr, idx);
+    }
+
+    public void setTable(int idx) {
+        LuaJNI.setTable0(ptr, idx);
+    }
+
+    public int getTable(int idx) {
+        return LuaJNI.getTable0(ptr, idx);
+    }
+
+    public void rawSet(int idx) {
+        LuaJNI.rawset0(ptr, idx);
+    }
+
+    public void rawGet(int idx) {
+        LuaJNI.rawget0(ptr, idx);
+    }
+
+    public void getMetatable(int objIdx) {
+        LuaJNI.getMetatable0(ptr, objIdx);
+    }
+
+    public void loadBuffer(String buf) {
+        LuaJNI.loadBufferx0(ptr, buf, null, null);
+    }
+
+    public void setGlobal(String global) {
+        LuaJNI.setGlobal0(ptr, global);
+    }
+
+    public void getGlobal(String global) {
+        LuaJNI.getGlobal0(ptr, global);
     }
 
     @Override
@@ -63,25 +146,11 @@ public class LuaState implements Closeable {
         if (needRelease) {
             synchronized (this) {
                 if (ptr != 0) {
-                    close0(ptr);
+                    LuaJNI.close0(ptr);
                     ptr = 0;
                 }
             }
         }
     }
 
-    private static native long newState0();
-
-
-    private static native int checkInteger0(long ptr, int arg);
-
-    private static native void pushInteger0(long ptr, int i);
-
-    private static native int toInteger0(long ptr, int idx);
-
-    private static native void pushClosure0(long ptr, long funcPtr, int n);
-
-    private static native void call0(long ptr, int nargs, int nresults);
-
-    private static native void close0(long ptr);
 }

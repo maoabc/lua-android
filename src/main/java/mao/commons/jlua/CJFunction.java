@@ -2,8 +2,17 @@ package mao.commons.jlua;
 
 /**
  * java层接口传递到native,通过ffi生成c闭包
+ * 对应结构体:
+ * {
+ * ffi_closure closure;
+ * ffi_cif cif;
+ * ffi_type *args[1];
+ * lua_CFunction func;
+ * <p>
+ * }
  */
 public abstract class CJFunction implements JFunction {
+    //native层结构体指针
     private long ptr;
 
     public CJFunction() {
@@ -11,7 +20,7 @@ public abstract class CJFunction implements JFunction {
     }
 
     @Override
-    public final int call(long luaState) {
+    public final int call(long luaState) throws Throwable {
         return call(LuaState.wrap(luaState));
     }
 
@@ -29,7 +38,11 @@ public abstract class CJFunction implements JFunction {
         return getCFunction0(ptr);
     }
 
-    protected abstract int call(LuaState luaState);
+    protected abstract int call(LuaState luaState) throws Throwable;
+
+
+
+
 
     private static native long createClosure0(JFunction function);
 
