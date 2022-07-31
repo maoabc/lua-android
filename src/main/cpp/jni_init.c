@@ -10,6 +10,7 @@ JavaVM *javaVM;
 
 extern void init_ids(JNIEnv *env);
 
+extern int register_luaJNI(JNIEnv *env);
 
 jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     javaVM = vm;
@@ -20,6 +21,8 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     }
 
     init_ids(env);
+
+    register_luaJNI(env);
 
 
     return JNI_VERSION_1_6;

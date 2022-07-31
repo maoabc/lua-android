@@ -25,8 +25,6 @@ JNIEnv *getJNIEnv();
 
 void throw_by_name(JNIEnv *env, const char *name, const char *msg);
 
-void throw_IOException(JNIEnv *env, const char *msg);
-
 void throw_LuaException(JNIEnv *env, const char *msg);
 
 
@@ -38,6 +36,7 @@ void throw_LuaException(JNIEnv *env, const char *msg);
 
 jmethodID funcCallMethodId;
 jmethodID toStringMethodId;
+jmethodID getMessageMethodId;
 
 #ifdef __cplusplus
 }

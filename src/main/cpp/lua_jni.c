@@ -2,7 +2,6 @@
 #include "lualib.h"
 #include "lapi.h"
 #include "lauxlib.h"
-#include "ffi.h"
 
 #include "utils.h"
 
@@ -33,7 +32,7 @@ static int isJavaObject(lua_State *l, int idx) {
     return 1;
 }
 
-static int gc(lua_State *L) {
+static int java_object_gc(lua_State *L) {
 
     if (!isJavaObject(L, 1)) {
         return 0;
@@ -67,15 +66,27 @@ Java_mao_commons_jlua_LuaJNI_newState0(JNIEnv *env, jclass clazz) {
 
 
 JNIEXPORT void JNICALL
-Java_mao_commons_jlua_LuaJNI_pushInteger0(JNIEnv *env, jclass clazz, jlong ptr, jint i) {
+Java_mao_commons_jlua_LuaJNI_pushInteger0(JNIEnv *env, jclass clazz, jlong ptr, jlong i) {
     lua_State *l = jlong_to_ptr(ptr);
     lua_pushinteger(l, i);
 }
 
-JNIEXPORT jint JNICALL
+JNIEXPORT jlong JNICALL
 Java_mao_commons_jlua_LuaJNI_toInteger0(JNIEnv *env, jclass clazz, jlong ptr, jint idx) {
     lua_State *l = jlong_to_ptr(ptr);
-    return (jint) lua_tointeger(l, idx);
+    return lua_tointeger(l, idx);
+}
+
+JNIEXPORT jboolean JNICALL
+Java_mao_commons_jlua_LuaJNI_isInteger0(JNIEnv *env, jclass clazz, jlong ptr, jint idx) {
+    lua_State *l = jlong_to_ptr(ptr);
+    return lua_isinteger(l, idx);
+}
+
+JNIEXPORT jboolean JNICALL
+Java_mao_commons_jlua_LuaJNI_isFloat0(JNIEnv *env, jclass clazz, jlong ptr, jint idx) {
+    lua_State *l = jlong_to_ptr(ptr);
+    return lua_isnumber(l, idx) && !lua_isinteger(l, idx);
 }
 
 JNIEXPORT void JNICALL
@@ -85,19 +96,55 @@ Java_mao_commons_jlua_LuaJNI_pushClosure0(JNIEnv *env, jclass clazz, jlong ptr, 
     lua_pushcclosure(l, (lua_CFunction) funcPtr, n);
 }
 
+JNIEXPORT void JNICALL
+Java_mao_commons_jlua_LuaJNI_pushBoolean0(JNIEnv *env, jclass clazz, jlong ptr, jboolean b) {
+    lua_State *l = jlong_to_ptr(ptr);
+    lua_pushboolean(l, b);
+}
+
+JNIEXPORT jboolean JNICALL
+Java_mao_commons_jlua_LuaJNI_isBoolean0(JNIEnv *env, jclass clazz, jlong ptr, jint idx) {
+    lua_State *l = jlong_to_ptr(ptr);
+    return lua_isboolean(l, idx);
+}
+
+JNIEXPORT jboolean JNICALL
+Java_mao_commons_jlua_LuaJNI_toBoolean0(JNIEnv *env, jclass clazz, jlong ptr, jint idx) {
+    lua_State *l = jlong_to_ptr(ptr);
+    return lua_toboolean(l, idx);
+}
+
+JNIEXPORT void JNICALL
+Java_mao_commons_jlua_LuaJNI_pushNumber0(JNIEnv *env, jclass clazz, jlong ptr, jdouble num) {
+    lua_State *l = jlong_to_ptr(ptr);
+    lua_pushnumber(l, num);
+}
+
+JNIEXPORT jboolean JNICALL
+Java_mao_commons_jlua_LuaJNI_isNumber0(JNIEnv *env, jclass clazz, jlong ptr, jint idx) {
+    lua_State *l = jlong_to_ptr(ptr);
+    return lua_isnumber(l, idx);
+}
+
+JNIEXPORT jdouble JNICALL
+Java_mao_commons_jlua_LuaJNI_toNumber0(JNIEnv *env, jclass clazz, jlong ptr, jint idx) {
+    lua_State *l = jlong_to_ptr(ptr);
+    return lua_tonumber(l, idx);
+}
+
 
 JNIEXPORT void JNICALL
 Java_mao_commons_jlua_LuaJNI_pushString0(JNIEnv *env, jclass clazz, jlong ptr, jstring str) {
     char buf[128];
     lua_State *l = jlong_to_ptr(ptr);
     if (str == NULL) {
+        throw_LuaException(env, "str is null");
         return;
     }
     const jsize utf_len = (*env)->GetStringUTFLength(env, str);
     const char *string;
     if (utf_len < sizeof(buf) - 1) {//使用栈上内存
-        jsize strLen = (*env)->GetStringLength(env, str);
-        (*env)->GetStringUTFRegion(env, str, 0, strLen, buf);
+        (*env)->GetStringUTFRegion(env, str, 0, (*env)->GetStringLength(env, str), buf);
         string = buf;
     } else {
         string = (*env)->GetStringUTFChars(env, str, NULL);
@@ -147,7 +194,7 @@ Java_mao_commons_jlua_LuaJNI_pushJavaObject0(JNIEnv *env, jclass clazz, jlong pt
     lua_newtable(l);
 
     lua_pushstring(l, LUA_TABLE_GC);
-    lua_pushcfunction(l, gc);
+    lua_pushcfunction(l, java_object_gc);
     lua_rawset(l, -3);
     /* Is Java Object boolean */
     lua_pushstring(l, LUA_JAVA_OBJECT);
@@ -224,13 +271,14 @@ Java_mao_commons_jlua_LuaJNI_call0(JNIEnv *env, jclass clazz, jlong ptr, jint na
                                    jint nresults) {
     lua_State *l = jlong_to_ptr(ptr);
     lua_call(l, nargs, nresults);
+    lua_newuserdata(l, 4);
 }
 
-JNIEXPORT void JNICALL
+JNIEXPORT int JNICALL
 Java_mao_commons_jlua_LuaJNI_pcall0(JNIEnv *env, jclass clazz, jlong ptr, jint nargs, jint nresults,
                                     jint errfunc) {
     lua_State *l = jlong_to_ptr(ptr);
-    lua_pcall(l, nargs, nresults, errfunc);
+    return lua_pcall(l, nargs, nresults, errfunc);
 }
 
 
@@ -263,6 +311,98 @@ Java_mao_commons_jlua_LuaJNI_error0(JNIEnv *env, jclass clazz, jlong ptr) {
     return lua_error(l);
 }
 
+JNIEXPORT jint JNICALL
+Java_mao_commons_jlua_LuaJNI_type0(JNIEnv *env, jclass clazz, jlong ptr, jint idx) {
+    lua_State *l = jlong_to_ptr(ptr);
+    return lua_type(l, idx);
+}
+
+JNIEXPORT jstring JNICALL
+Java_mao_commons_jlua_LuaJNI_typeName0(JNIEnv *env, jclass clazz, jlong ptr, jint type) {
+    lua_State *l = jlong_to_ptr(ptr);
+    const char *string = lua_typename(l, type);
+    if (string == NULL) {
+        return NULL;
+    }
+    return (*env)->NewStringUTF(env, string);
+}
+
+JNIEXPORT void JNICALL
+Java_mao_commons_jlua_LuaJNI_pushNil0(JNIEnv *env, jclass clazz, jlong ptr) {
+    lua_State *l = jlong_to_ptr(ptr);
+    lua_pushnil(l);
+}
+
+JNIEXPORT void JNICALL
+Java_mao_commons_jlua_LuaJNI_remove0(JNIEnv *env, jclass clazz, jlong ptr, jint idx) {
+    lua_State *l = jlong_to_ptr(ptr);
+    lua_remove(l, idx);
+}
+
+JNIEXPORT void JNICALL
+Java_mao_commons_jlua_LuaJNI_createTable0(JNIEnv *env, jclass clazz, jlong ptr,
+                                          jint narr, jint nrec) {
+    lua_State *l = jlong_to_ptr(ptr);
+    lua_createtable(l, narr, nrec);
+}
+
+JNIEXPORT jint JNICALL
+Java_mao_commons_jlua_LuaJNI_getField0(JNIEnv *env, jclass clazz, jlong ptr,
+                                       jint idx, jstring key) {
+    lua_State *l = jlong_to_ptr(ptr);
+    if (key == NULL) {
+        throw_LuaException(env, "key is null");
+        return 0;
+    }
+    const char *k = (*env)->GetStringUTFChars(env, key, NULL);
+
+    int ret = lua_getfield(l, idx, k);
+
+    (*env)->ReleaseStringUTFChars(env, key, k);
+
+    return ret;
+}
+
+JNIEXPORT void JNICALL
+Java_mao_commons_jlua_LuaJNI_setField0(JNIEnv *env, jclass clazz, jlong ptr,
+                                       jint idx, jstring key) {
+    lua_State *l = jlong_to_ptr(ptr);
+    if (key == NULL) {
+        throw_LuaException(env, "key is null");
+        return;
+    }
+    const char *k = (*env)->GetStringUTFChars(env, key, NULL);
+
+    lua_setfield(l, idx, k);
+
+    (*env)->ReleaseStringUTFChars(env, key, k);
+
+}
+
+JNIEXPORT jint JNICALL
+Java_mao_commons_jlua_LuaJNI_getI0(JNIEnv *env, jclass clazz, jlong ptr, jint idx, jint n) {
+    lua_State *l = jlong_to_ptr(ptr);
+    return lua_geti(l, idx, n);
+}
+
+JNIEXPORT void JNICALL
+Java_mao_commons_jlua_LuaJNI_setI0(JNIEnv *env, jclass clazz, jlong ptr, jint idx, jint n) {
+    lua_State *l = jlong_to_ptr(ptr);
+    lua_seti(l, idx, n);
+}
+
+JNIEXPORT jint JNICALL
+Java_mao_commons_jlua_LuaJNI_rawGetI0(JNIEnv *env, jclass clazz, jlong ptr, jint idx, jint n) {
+    lua_State *l = jlong_to_ptr(ptr);
+    return lua_rawgeti(l, idx, n);
+}
+
+JNIEXPORT void JNICALL
+Java_mao_commons_jlua_LuaJNI_rawSetI0(JNIEnv *env, jclass clazz, jlong ptr, jint idx, jint n) {
+    lua_State *l = jlong_to_ptr(ptr);
+    lua_rawseti(l, idx, n);
+}
+
 
 JNIEXPORT void JNICALL
 Java_mao_commons_jlua_LuaJNI_close0(JNIEnv *env, jclass clazz, jlong ptr) {
@@ -270,5 +410,20 @@ Java_mao_commons_jlua_LuaJNI_close0(JNIEnv *env, jclass clazz, jlong ptr) {
     lua_close(l);
 }
 
+static void initIntConstant(JNIEnv *env, jclass c, const char *fieldName, int value) {
+    jfieldID field = (*env)->GetStaticFieldID(env, c, fieldName, "I");
+    (*env)->SetStaticIntField(env, c, field, value);
+}
+
+
+int register_luaJNI(JNIEnv *env) {
+    jclass luaClass = (*env)->FindClass(env, "mao/commons/jlua/LuaJNI");
+
+    initIntConstant(env, luaClass, "LUAI_MAXSTACK", LUAI_MAXSTACK);
+    initIntConstant(env, luaClass, "LUA_REGISTRYINDEX", LUA_REGISTRYINDEX);
+
+    (*env)->DeleteLocalRef(env, luaClass);
+
+}
 
 

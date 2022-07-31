@@ -41,7 +41,10 @@ set(SRC_FILES
 
         )
 
-add_definitions(-DLUA_USE_C99 -Wall -Wextra)
+add_definitions(-DLUA_USE_C99 -Wall -Wextra )
+
+#支持unicode变量名
+add_definitions(-DLUA_UCID)
 
 add_library(lua_static STATIC ${SRC_FILES})
 

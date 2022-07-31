@@ -22,9 +22,7 @@ JNIEnv *getJNIEnv() {
 }
 
 
-static jclass IOExceptionClass;
 static jclass LuaExceptionClass;
-
 
 
 void throw_by_name(JNIEnv *env, const char *name, const char *msg) {
@@ -33,13 +31,6 @@ void throw_by_name(JNIEnv *env, const char *name, const char *msg) {
         (*env)->ThrowNew(env, cls, msg);
         (*env)->DeleteLocalRef(env, cls);
     }
-}
-
-void throw_IOException(JNIEnv *env, const char *msg) {
-    if (msg == NULL) {
-        msg = "";
-    }
-    (*env)->ThrowNew(env, IOExceptionClass, msg);
 }
 
 void throw_LuaException(JNIEnv *env, const char *msg) {
@@ -52,7 +43,6 @@ void throw_LuaException(JNIEnv *env, const char *msg) {
 
 void init_ids(JNIEnv *env) {
 
-    IOExceptionClass = (*env)->NewGlobalRef(env, (*env)->FindClass(env, "java/io/IOException"));
 
     LuaExceptionClass = (*env)->NewGlobalRef(env, (*env)->FindClass(env,
                                                                     "mao/commons/jlua/LuaException"));
@@ -64,6 +54,8 @@ void init_ids(JNIEnv *env) {
 
     jclass throwableCls = (*env)->FindClass(env, "java/lang/Throwable");
     toStringMethodId = (*env)->GetMethodID(env, throwableCls, "toString", "()Ljava/lang/String;");
+    getMessageMethodId = (*env)->GetMethodID(env, throwableCls, "getMessage",
+                                             "()Ljava/lang/String;");
     (*env)->DeleteLocalRef(env, throwableCls);
 }
 

@@ -15,7 +15,10 @@
     jthrowable occurred = (*_env)->ExceptionOccurred(_env);                          \
     if (occurred != NULL) {                                                          \
         (*_env)->ExceptionClear(_env);                                               \
-        jobject str = (*_env)->CallObjectMethod(_env, occurred, toStringMethodId);   \
+        jobject str = (*_env)->CallObjectMethod(_env, occurred, getMessageMethodId); \
+        if (str == NULL) {                                                           \
+            str = (*_env)->CallObjectMethod(_env, occurred, toStringMethodId);       \
+        }                                                                            \
         if (str != NULL) {                                                           \
             const char *utfChars = (*_env)->GetStringUTFChars(_env, str, NULL);      \
             lua_pushstring(_L, utfChars);                                            \

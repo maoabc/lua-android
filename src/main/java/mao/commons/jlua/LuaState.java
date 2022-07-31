@@ -7,24 +7,20 @@ import java.io.Closeable;
 public class LuaState implements Closeable {
 
 
-    private long ptr;
-    private final boolean needRelease;
+    long ptr;
 
-    private LuaState() {
-        this.ptr = LuaJNI.newState0();
-        needRelease = true;
-    }
-
-    private LuaState(long ptr) {
+    protected LuaState(long ptr) {
         this.ptr = ptr;
-        needRelease = false;
     }
 
     public static LuaState create() {
-        return new LuaState();
+        return new FinalizeLuaState();
     }
 
     static LuaState wrap(long ptr) {
+        if (ptr == 0) {
+            throw new IllegalArgumentException("ptr is null");
+        }
         return new LuaState(ptr);
     }
 
@@ -40,16 +36,53 @@ public class LuaState implements Closeable {
         LuaJNI.pushClosure0(ptr, function.getCFunction(), 0);
     }
 
-    public void pushInteger(int i) {
+    public void remove(int idx) {
+        LuaJNI.remove0(ptr, idx);
+    }
+
+    public void pushInt32(int i) {
         LuaJNI.pushInteger0(ptr, i);
     }
 
-    public int toInteger(int idx) {
+    public void pushInt64(long i) {
+        LuaJNI.pushInteger0(ptr, i);
+    }
+
+
+    public int toInt32(int idx) {
+        return (int) LuaJNI.toInteger0(ptr, idx);
+    }
+
+    public long toInt64(int idx) {
         return LuaJNI.toInteger0(ptr, idx);
+    }
+
+    public boolean isInteger(int idx) {
+        return LuaJNI.isInteger0(ptr, idx);
+    }
+
+    public void pushBoolean(boolean b) {
+        LuaJNI.pushBoolean0(ptr, b);
+    }
+
+    public boolean toBoolean(int idx) {
+        return LuaJNI.toBoolean0(ptr, idx);
+    }
+
+    public void pushNumber(double num) {
+        LuaJNI.pushNumber0(ptr, num);
+    }
+
+    public double toNumber(int idx) {
+        return LuaJNI.toNumber0(ptr, idx);
     }
 
     public void call(int nargs, int nresults) {
         LuaJNI.call0(ptr, nargs, nresults);
+    }
+
+    public int pcall(int nargs, int nresults, int errfunc) {
+        return LuaJNI.pcall0(ptr, nargs, nresults, errfunc);
     }
 
     public void pushJavaObject(Object obj) {
@@ -78,6 +111,22 @@ public class LuaState implements Closeable {
 
     public void error() {
         LuaJNI.error0(ptr);
+    }
+
+    public int type(int idx) {
+        return LuaJNI.type0(ptr, idx);
+    }
+
+    public String typeName(int type) {
+        return LuaJNI.typeName0(ptr, type);
+    }
+
+    public void pushNil() {
+        LuaJNI.pushNil0(ptr);
+    }
+
+    public boolean isNil(int idx) {
+        return LuaJNI.type0(ptr, idx) == LuaJNI.LUA_TNIL;
     }
 
     public String toLString(int idx) {
@@ -121,7 +170,7 @@ public class LuaState implements Closeable {
     }
 
     public void loadBuffer(String buf) {
-        LuaJNI.loadBufferx0(ptr, buf, null, null);
+        LuaJNI.loadBufferx0(ptr, buf.getBytes(), null, null);
     }
 
     public void setGlobal(String global) {
@@ -132,18 +181,59 @@ public class LuaState implements Closeable {
         LuaJNI.getGlobal0(ptr, global);
     }
 
+    public int getI(int idx, int n) {
+        return LuaJNI.getI0(ptr, idx, n);
+    }
+
+    public void setI(int idx, int n) {
+        LuaJNI.setI0(ptr, idx, n);
+    }
+
+    public int getField(int idx, String key) {
+        return LuaJNI.getField0(ptr, idx, key);
+    }
+
+    public void setField(int idx, String key) {
+        LuaJNI.setField0(ptr, idx, key);
+    }
+
+    public int rawGetI(int idx, int n) {
+        return LuaJNI.rawGetI0(ptr, idx, n);
+    }
+
+    public void rawSetI(int idx, int n) {
+        LuaJNI.rawSetI0(ptr, idx, n);
+    }
+
+    public void newTable() {
+        LuaJNI.createTable0(ptr, 0, 0);
+    }
+
+    public void checkType(int arg, int t) {
+        LuaJNI.checkType0(ptr, arg, t);
+    }
+
     @Override
     public void close() {
-        release();
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        release();
+    public int ref(int t) {
+        return LuaJNI.ref0(ptr, t);
     }
 
-    private void release() {
-        if (needRelease) {
+    public void unref(int t, int ref) {
+        LuaJNI.unref0(ptr, t, ref);
+    }
+
+
+    static final class FinalizeLuaState extends LuaState {
+
+        FinalizeLuaState() {
+            super(LuaJNI.newState0());
+        }
+
+        @Override
+        public void close() {
             synchronized (this) {
                 if (ptr != 0) {
                     LuaJNI.close0(ptr);
@@ -151,6 +241,10 @@ public class LuaState implements Closeable {
                 }
             }
         }
-    }
 
+        @Override
+        protected void finalize() throws Throwable {
+            close();
+        }
+    }
 }

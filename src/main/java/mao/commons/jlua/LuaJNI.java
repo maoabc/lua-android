@@ -4,18 +4,78 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 public class LuaJNI {
+    public static final int LUAI_MAXSTACK = placeholder();
+    public static final int LUA_REGISTRYINDEX = placeholder();
+
+    public static final int LUA_OK = 0;
+    public static final int LUA_YIELD = 1;
+    public static final int LUA_ERRRUN = 2;
+    public static final int LUA_ERRSYNTAX = 3;
+    public static final int LUA_ERRMEM = 4;
+    public static final int LUA_ERRERR = 5;
+
+    /*
+     ** basic types
+     */
+    public static final int LUA_TNONE = (-1);
+
+    public static final int LUA_TNIL = 0;
+    public static final int LUA_TBOOLEAN = 1;
+    public static final int LUA_TLIGHTUSERDATA = 2;
+    public static final int LUA_TNUMBER = 3;
+    public static final int LUA_TSTRING = 4;
+    public static final int LUA_TTABLE = 5;
+    public static final int LUA_TFUNCTION = 6;
+    public static final int LUA_TUSERDATA = 7;
+    public static final int LUA_TTHREAD = 8;
+
+    public static final int LUA_NUMTYPES = 9;
+
+
+    /* predefined references */
+    public static final int LUA_NOREF = (-2);
+    public static final int LUA_REFNIL = (-1);
+
 
     static {
         System.loadLibrary("jlua");
     }
 
+    // A hack to avoid these constants being inlined by javac...
+    private static int placeholder() {
+        return 0;
+    }
+
+
+    public static int upValueIndex(int idx) {
+        return LUA_REGISTRYINDEX - idx;
+    }
+
+
     //lua.h
     static native long newState0();
 
 
-    static native void pushInteger0(long ptr, int i);
+    static native void pushInteger0(long ptr, long i);
 
-    static native int toInteger0(long ptr, int idx);
+    static native long toInteger0(long ptr, int idx);
+
+    static native boolean isInteger0(long ptr, int idx);
+
+    static native boolean isFloat0(long ptr, int idx);
+
+    static native void pushBoolean0(long ptr, boolean b);
+
+    static native boolean isBoolean0(long ptr, int idx);
+
+    static native boolean toBoolean0(long ptr, int idx);
+
+    static native void pushNumber0(long ptr, double num);
+
+    static native boolean isNumber0(long ptr, int idx);
+
+    static native double toNumber0(long ptr, int idx);
+
 
     static native void pushClosure0(long ptr, long funcPtr, int n);
 
@@ -51,7 +111,7 @@ public class LuaJNI {
 
     static native void call0(long ptr, int nargs, int nresults);
 
-    static native void pcall0(long ptr, int nargs, int nresults, int errfunc);
+    static native int pcall0(long ptr, int nargs, int nresults, int errfunc);
 
     static native void close0(long ptr);
 
@@ -61,16 +121,42 @@ public class LuaJNI {
 
     static native int error0(long ptr);
 
+    static native int type0(long ptr, int idx);
 
+    static native String typeName0(long ptr, int type);
+
+    static native void pushNil0(long ptr);
+
+    static native void remove0(long ptr, int idx);
+
+    static native void createTable0(long ptr, int narr, int nrec);
+
+    static native int getField0(long ptr, int idx, String key);
+
+    static native void setField0(long ptr, int idx, String key);
+
+    static native int rawGetI0(long ptr, int idx, int n);
+
+    static native void rawSetI0(long ptr, int idx, int n);
+
+    static native int getI0(long ptr, int idx, int n);
+
+    static native void setI0(long ptr, int idx, int n);
 
 
     //lauxlib.h
-    static native int loadBufferx0(long ptr, @NonNull String buffer,
+    static native int loadBufferx0(long ptr, @NonNull byte[] buffer,
                                    @Nullable String name,
                                    @Nullable String mode);
 
     static native int checkInteger0(long ptr, int arg);
 
     static native String checkLString0(long ptr, int arg);
+
+    static native void checkType0(long ptr, int arg, int t);
+
+    static native int ref0(long ptr, int t);
+
+    static native void unref0(long ptr, int t, int ref);
 
 }

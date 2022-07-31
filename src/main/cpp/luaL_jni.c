@@ -10,14 +10,14 @@
 
 
 JNIEXPORT jint JNICALL
-Java_mao_commons_jlua_LuaJNI_loadBufferx0(JNIEnv *env, jclass clazz, jlong ptr, jstring buffer,
+Java_mao_commons_jlua_LuaJNI_loadBufferx0(JNIEnv *env, jclass clazz, jlong ptr, jbyteArray buffer,
                                           jstring jname, jstring jmode) {
     lua_State *l = jlong_to_ptr(ptr);
     if (buffer == NULL) {
         return 0;
     }
-    const char *utf_buf = (*env)->GetStringUTFChars(env, buffer, NULL);
-    jsize utf_len = (*env)->GetStringUTFLength(env, buffer);
+    jbyte *buf = (*env)->GetByteArrayElements(env, buffer, NULL);
+    jsize len = (*env)->GetArrayLength(env, buffer);
     const char *name = NULL;
     if (jname != NULL) {
         name = (*env)->GetStringUTFChars(env, jname, NULL);
@@ -27,9 +27,10 @@ Java_mao_commons_jlua_LuaJNI_loadBufferx0(JNIEnv *env, jclass clazz, jlong ptr, 
         mode = (*env)->GetStringUTFChars(env, jmode, NULL);
     }
 
-    int ret = luaL_loadbufferx(l, utf_buf, utf_len, name, mode);
+    int ret = luaL_loadbufferx(l, (const char *) buf, len, name, mode);
 
-    (*env)->ReleaseStringUTFChars(env, buffer, utf_buf);
+    (*env)->ReleaseByteArrayElements(env, buffer, buf, JNI_ABORT);
+
     if (jname != NULL) {
         (*env)->ReleaseStringUTFChars(env, jname, name);
     }
@@ -56,5 +57,24 @@ Java_mao_commons_jlua_LuaJNI_checkLString0(JNIEnv *env, jclass clazz, jlong ptr,
         return NULL;
     }
     return (*env)->NewStringUTF(env, string);
+}
+
+
+JNIEXPORT void JNICALL
+Java_mao_commons_jlua_LuaJNI_checkType0(JNIEnv *env, jclass clazz, jlong ptr, jint arg, jint t) {
+    lua_State *l = jlong_to_ptr(ptr);
+    luaL_checktype(l,arg,t);
+}
+
+JNIEXPORT jint JNICALL
+Java_mao_commons_jlua_LuaJNI_ref0(JNIEnv *env, jclass clazz, jlong ptr, jint t) {
+    lua_State *l = jlong_to_ptr(ptr);
+    return luaL_ref(l, t);
+}
+
+JNIEXPORT void JNICALL
+Java_mao_commons_jlua_LuaJNI_unref0(JNIEnv *env, jclass clazz, jlong ptr, jint t, jint ref) {
+    lua_State *l = jlong_to_ptr(ptr);
+    luaL_unref(l, t, ref);
 }
 

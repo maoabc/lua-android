@@ -13,24 +13,24 @@ public class LuaStateTest {
             protected int call(LuaState luaState) {
                 final int i1 = luaState.checkInteger(-1);
                 final int i2 = luaState.checkInteger(-2);
-                luaState.pushInteger(i1 + i2);
+                luaState.pushInt32(i1 + i2);
                 return 1;
             }
         };
         state.pushClosure(function, 0);
-        state.pushInteger(4);
-        state.pushInteger(5);
+        state.pushInt32(4);
+        state.pushInt32(5);
         state.call(2, 1);
-        final int i = state.toInteger(1);
+        final int i = state.toInt32(1);
         state.setGlobal("myv");
         state.getGlobal("myv");
-        final int i1 = state.toInteger(-1);
+        final int i1 = state.toInt32(-1);
         state.loadBuffer("function abc(a) return a*a end");
         state.call(0, 0);
         state.getGlobal("abc");
-        state.pushInteger(4);
+        state.pushInt32(4);
         state.call(1, 1);
-        final int i2 = state.toInteger(-1);
+        final int i2 = state.toInt32(-1);
 
         System.out.println(i);
     }
