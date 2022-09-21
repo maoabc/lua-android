@@ -7,6 +7,36 @@ import java.io.Closeable;
 public class LuaState implements Closeable {
 
 
+    public static final int LUA_OK = 0;
+    public static final int LUA_YIELD = 1;
+    public static final int LUA_ERRRUN = 2;
+    public static final int LUA_ERRSYNTAX = 3;
+    public static final int LUA_ERRMEM = 4;
+    public static final int LUA_ERRERR = 5;
+
+    /*
+     ** basic types
+     */
+    public static final int LUA_TNONE = (-1);
+
+    public static final int LUA_TNIL = 0;
+    public static final int LUA_TBOOLEAN = 1;
+    public static final int LUA_TLIGHTUSERDATA = 2;
+    public static final int LUA_TNUMBER = 3;
+    public static final int LUA_TSTRING = 4;
+    public static final int LUA_TTABLE = 5;
+    public static final int LUA_TFUNCTION = 6;
+    public static final int LUA_TUSERDATA = 7;
+    public static final int LUA_TTHREAD = 8;
+
+    public static final int LUA_NUMTYPES = 9;
+
+
+    /* predefined references */
+    public static final int LUA_NOREF = (-2);
+    public static final int LUA_REFNIL = (-1);
+
+
     long ptr;
 
     protected LuaState(long ptr) {
@@ -24,7 +54,7 @@ public class LuaState implements Closeable {
         return new LuaState(ptr);
     }
 
-    public int checkInteger(int arg) {
+    public int checkInt(int arg) {
         return LuaJNI.checkInteger0(ptr, arg);
     }
 
@@ -34,6 +64,10 @@ public class LuaState implements Closeable {
 
     public void pushFunction(CJFunction function) {
         LuaJNI.pushClosure0(ptr, function.getCFunction(), 0);
+    }
+
+    void pushCClosure(long funcPtr, int n) {
+        LuaJNI.pushClosure0(ptr, funcPtr, n);
     }
 
     public void remove(int idx) {
@@ -78,11 +112,15 @@ public class LuaState implements Closeable {
     }
 
     public void call(int nargs, int nresults) {
-        LuaJNI.call0(ptr, nargs, nresults);
+        LuaJNI.pcall0(ptr, nargs, nresults, 0);
     }
 
     public int pcall(int nargs, int nresults, int errfunc) {
         return LuaJNI.pcall0(ptr, nargs, nresults, errfunc);
+    }
+
+    public static int upValueIndex(int idx) {
+        return LuaJNI.LUA_REGISTRYINDEX - idx;
     }
 
     public void pushJavaObject(Object obj) {
@@ -105,8 +143,41 @@ public class LuaState implements Closeable {
         return LuaJNI.isString0(ptr, idx);
     }
 
+    public boolean isTable(int idx) {
+        return LuaJNI.type0(ptr, idx) == LUA_TTABLE;
+    }
+
+    public void iterTable(TableIterator iterator) {
+        pushNil();
+        while (next(-2)) {
+            if (iterator != null) iterator.iter(this);
+            pop(1);
+        }
+    }
+
     public String checkLString(int arg) {
         return LuaJNI.checkLString0(ptr, arg);
+    }
+
+    public String optLString(int idx, String def) {
+        if (type(idx) <= 0) {
+            return def;
+        }
+        return checkLString(idx);
+    }
+
+    public int optInt(int idx, int def) {
+        if (type(idx) <= 0) {
+            return def;
+        }
+        return checkInt(idx);
+    }
+
+    public boolean optBoolean(int idx, boolean def) {
+        if (type(idx) <= 0) {
+            return def;
+        }
+        return toBoolean(idx);
     }
 
     public void error() {
@@ -126,7 +197,7 @@ public class LuaState implements Closeable {
     }
 
     public boolean isNil(int idx) {
-        return LuaJNI.type0(ptr, idx) == LuaJNI.LUA_TNIL;
+        return LuaJNI.type0(ptr, idx) == LUA_TNIL;
     }
 
     public String toLString(int idx) {
@@ -173,6 +244,10 @@ public class LuaState implements Closeable {
         LuaJNI.loadBufferx0(ptr, buf.getBytes(), null, null);
     }
 
+    public void loadBuffer(String buf, String name) {
+        LuaJNI.loadBufferx0(ptr, buf.getBytes(), name, null);
+    }
+
     public void setGlobal(String global) {
         LuaJNI.setGlobal0(ptr, global);
     }
@@ -213,6 +288,10 @@ public class LuaState implements Closeable {
         LuaJNI.checkType0(ptr, arg, t);
     }
 
+    public boolean next(int idx) {
+        return LuaJNI.next0(ptr, idx);
+    }
+
     @Override
     public void close() {
     }
@@ -226,7 +305,7 @@ public class LuaState implements Closeable {
     }
 
 
-    static final class FinalizeLuaState extends LuaState {
+    private static final class FinalizeLuaState extends LuaState {
 
         FinalizeLuaState() {
             super(LuaJNI.newState0());
@@ -246,5 +325,9 @@ public class LuaState implements Closeable {
         protected void finalize() throws Throwable {
             close();
         }
+    }
+
+    public interface TableIterator {
+        void iter(LuaState l);
     }
 }

@@ -24,6 +24,10 @@ JNIEnv *getJNIEnv() {
 
 static jclass LuaExceptionClass;
 
+jmethodID funcCallMethodId;
+jmethodID toStringMethodId;
+jmethodID getMessageMethodId;
+
 
 void throw_by_name(JNIEnv *env, const char *name, const char *msg) {
     jclass cls = (*env)->FindClass(env, name);

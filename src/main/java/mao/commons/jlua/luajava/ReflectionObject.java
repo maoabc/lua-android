@@ -7,7 +7,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import mao.commons.jlua.CJFunction;
-import mao.commons.jlua.LuaJNI;
 import mao.commons.jlua.LuaState;
 
 /**
@@ -94,7 +93,7 @@ public class ReflectionObject {
     private static final CJFunction methodInvokeFunction = new CJFunction() {
         @Override
         protected int call(LuaState luaState) throws Throwable {
-            final String name = luaState.checkLString(LuaJNI.upValueIndex(1));
+            final String name = luaState.checkLString(LuaState.upValueIndex(1));
             //第一个参数为对象
             final Object obj = luaState.checkJavaObject(1);
             try {

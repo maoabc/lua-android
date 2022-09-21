@@ -11,8 +11,8 @@ public class LuaStateTest {
         final CJFunction function = new CJFunction() {
             @Override
             protected int call(LuaState luaState) {
-                final int i1 = luaState.checkInteger(-1);
-                final int i2 = luaState.checkInteger(-2);
+                final int i1 = luaState.checkInt(-1);
+                final int i2 = luaState.checkInt(-2);
                 luaState.pushInt32(i1 + i2);
                 return 1;
             }

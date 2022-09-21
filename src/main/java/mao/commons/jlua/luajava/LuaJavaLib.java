@@ -68,13 +68,14 @@ public class LuaJavaLib {
         protected int call(LuaState luaState) throws Throwable {
             final int top = luaState.getTop();
             if (top < 2) {
-                //todo 抛出异常
+                luaState.pushString("Argument count < 2");
+                luaState.error();
+                return 0;
             }
 
             final String[] interfaces = luaState.checkLString(1).split(",");
 
             luaState.remove(1);
-            final int top1 = luaState.getTop();
 
             final Class<?>[] classes = new Class[interfaces.length];
             for (int i = 0; i < interfaces.length; i++) {

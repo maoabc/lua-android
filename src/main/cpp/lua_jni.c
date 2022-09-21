@@ -3,6 +3,7 @@
 #include "lapi.h"
 #include "lauxlib.h"
 
+#include "lua_jni.h"
 #include "utils.h"
 
 #define LOG_TAG "ffi"
@@ -14,7 +15,7 @@
 #define LUA_TABLE_GC "__gc"
 
 
-static int isJavaObject(lua_State *l, int idx) {
+int isJavaObject(lua_State *l, int idx) {
     if (!lua_isuserdata(l, idx))
         return 0;
 
@@ -60,8 +61,8 @@ static int java_object_gc(lua_State *L) {
 JNIEXPORT jlong JNICALL
 Java_mao_commons_jlua_LuaJNI_newState0(JNIEnv *env, jclass clazz) {
     lua_State *pState = luaL_newstate();
-    jlong i = ptr_to_jlong(pState);
-    return i;
+    luaL_openlibs(pState);
+    return ptr_to_jlong(pState);
 }
 
 
@@ -186,9 +187,7 @@ Java_mao_commons_jlua_LuaJNI_getTop0(JNIEnv *env, jclass clazz, jlong ptr) {
 }
 
 
-JNIEXPORT void JNICALL
-Java_mao_commons_jlua_LuaJNI_pushJavaObject0(JNIEnv *env, jclass clazz, jlong ptr, jobject obj) {
-    lua_State *l = jlong_to_ptr(ptr);
+void pushJavaObject(JNIEnv *env, lua_State *l, jobject *obj) {
     jobject *userdata = lua_newuserdata(l, sizeof(jobject));
     *userdata = (*env)->NewGlobalRef(env, obj);
     lua_newtable(l);
@@ -205,7 +204,12 @@ Java_mao_commons_jlua_LuaJNI_pushJavaObject0(JNIEnv *env, jclass clazz, jlong pt
         lua_pushstring(l, "Cannot create table to java object.");
         lua_error(l);
     }
+}
 
+void JNICALL
+Java_mao_commons_jlua_LuaJNI_pushJavaObject0(JNIEnv *env, jclass clazz, jlong ptr, jobject obj) {
+    lua_State *l = jlong_to_ptr(ptr);
+    pushJavaObject(env, l, obj);
 }
 
 
@@ -271,7 +275,6 @@ Java_mao_commons_jlua_LuaJNI_call0(JNIEnv *env, jclass clazz, jlong ptr, jint na
                                    jint nresults) {
     lua_State *l = jlong_to_ptr(ptr);
     lua_call(l, nargs, nresults);
-    lua_newuserdata(l, 4);
 }
 
 JNIEXPORT int JNICALL
@@ -391,6 +394,7 @@ Java_mao_commons_jlua_LuaJNI_setI0(JNIEnv *env, jclass clazz, jlong ptr, jint id
     lua_seti(l, idx, n);
 }
 
+
 JNIEXPORT jint JNICALL
 Java_mao_commons_jlua_LuaJNI_rawGetI0(JNIEnv *env, jclass clazz, jlong ptr, jint idx, jint n) {
     lua_State *l = jlong_to_ptr(ptr);
@@ -401,6 +405,12 @@ JNIEXPORT void JNICALL
 Java_mao_commons_jlua_LuaJNI_rawSetI0(JNIEnv *env, jclass clazz, jlong ptr, jint idx, jint n) {
     lua_State *l = jlong_to_ptr(ptr);
     lua_rawseti(l, idx, n);
+}
+
+JNIEXPORT jboolean JNICALL
+Java_mao_commons_jlua_LuaJNI_next0(JNIEnv *env, jclass clazz, jlong ptr, jint idx) {
+    lua_State *l = jlong_to_ptr(ptr);
+    return lua_next(l, idx);
 }
 
 
@@ -416,7 +426,7 @@ static void initIntConstant(JNIEnv *env, jclass c, const char *fieldName, int va
 }
 
 
-int register_luaJNI(JNIEnv *env) {
+void register_luaJNI(JNIEnv *env) {
     jclass luaClass = (*env)->FindClass(env, "mao/commons/jlua/LuaJNI");
 
     initIntConstant(env, luaClass, "LUAI_MAXSTACK", LUAI_MAXSTACK);

@@ -28,15 +28,14 @@ void throw_by_name(JNIEnv *env, const char *name, const char *msg);
 void throw_LuaException(JNIEnv *env, const char *msg);
 
 
-
 #define  ALOGI(...)  __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 #define  ALOGE(...)  __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 #define  ALOGD(...)  __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
 #define  ALOGW(...)  __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
 
-jmethodID funcCallMethodId;
-jmethodID toStringMethodId;
-jmethodID getMessageMethodId;
+extern jmethodID funcCallMethodId;
+extern jmethodID toStringMethodId;
+extern jmethodID getMessageMethodId;
 
 #ifdef __cplusplus
 }

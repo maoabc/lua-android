@@ -5,7 +5,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import mao.commons.jlua.LuaJNI;
 import mao.commons.jlua.LuaState;
 
 public class ReflectionUtils {
@@ -45,17 +44,17 @@ public class ReflectionUtils {
         for (int i = 0; i < varArgc; i++) {
             final int idx = argIdx + 1 + i + 1;
             final int luaType = l.type(idx);
-            if (luaType == LuaJNI.LUA_TSTRING) {
+            if (luaType == LuaState.LUA_TSTRING) {
                 varArgs[i] = l.toLString(idx);
-            } else if (luaType == LuaJNI.LUA_TNUMBER) {
+            } else if (luaType == LuaState.LUA_TNUMBER) {
                 if (l.isInteger(idx)) {
                     varArgs[i] = l.toInt64(idx);
                 } else {//double
                     varArgs[i] = l.toNumber(idx);
                 }
-            } else if (luaType == LuaJNI.LUA_TBOOLEAN) {
+            } else if (luaType == LuaState.LUA_TBOOLEAN) {
                 varArgs[i] = l.toBoolean(idx);
-            } else if (luaType == LuaJNI.LUA_TNIL) {
+            } else if (luaType == LuaState.LUA_TNIL) {
                 varArgs[i] = null;
             } else if (l.isJavaObject(idx)) {
                 varArgs[i] = l.checkJavaObject(idx);
@@ -83,11 +82,11 @@ public class ReflectionUtils {
         final int idx = parameterIdx + 1 + 1;//lua从1开始,同时第一个参数为对象本身需要排除
         final int luaType = l.type(idx);
         if (parameterType.isPrimitive()) {
-            if (parameterType == Boolean.TYPE && luaType == LuaJNI.LUA_TBOOLEAN) {//是否为boolean
+            if (parameterType == Boolean.TYPE && luaType == LuaState.LUA_TBOOLEAN) {//是否为boolean
                 outArgs[parameterIdx] = l.toBoolean(idx);
                 return true;
             }
-            if (parameterType == Character.TYPE && luaType == LuaJNI.LUA_TSTRING) {//lua长度为1的字符串可以当成java的char
+            if (parameterType == Character.TYPE && luaType == LuaState.LUA_TSTRING) {//lua长度为1的字符串可以当成java的char
                 final String s = l.toLString(idx);
                 if (s.length() == 1) {
                     outArgs[parameterIdx] = (char) s.charAt(0);
@@ -95,7 +94,7 @@ public class ReflectionUtils {
                 }
                 return false;
             }
-            if (luaType == LuaJNI.LUA_TNUMBER) {
+            if (luaType == LuaState.LUA_TNUMBER) {
                 if (parameterType == Byte.TYPE) {
                     outArgs[parameterIdx] = (byte) l.toInt64(idx);
                 } else if (parameterType == Short.TYPE) {
@@ -115,7 +114,7 @@ public class ReflectionUtils {
             }
             return false;
         }
-        if (parameterType == String.class && luaType == LuaJNI.LUA_TSTRING) {//字符串
+        if (parameterType == String.class && luaType == LuaState.LUA_TSTRING) {//字符串
             outArgs[parameterIdx] = l.toLString(idx);
             return true;
         }
@@ -128,7 +127,7 @@ public class ReflectionUtils {
                 return false;
             }
         }
-        if (luaType == LuaJNI.LUA_TNIL) {
+        if (luaType == LuaState.LUA_TNIL) {
             outArgs[parameterIdx] = null;
             return true;
         }

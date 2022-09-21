@@ -41,6 +41,12 @@ Java_mao_commons_jlua_LuaJNI_loadBufferx0(JNIEnv *env, jclass clazz, jlong ptr, 
     return ret;
 }
 
+JNIEXPORT void JNICALL
+Java_mao_commons_jlua_LuaJNI_openLibs0(JNIEnv *env, jclass clazz, jlong ptr) {
+    lua_State *l = jlong_to_ptr(ptr);
+    luaL_openlibs(l);
+}
+
 
 JNIEXPORT jint JNICALL
 Java_mao_commons_jlua_LuaJNI_checkInteger0(JNIEnv *env, jclass clazz, jlong ptr, jint arg) {
@@ -63,7 +69,7 @@ Java_mao_commons_jlua_LuaJNI_checkLString0(JNIEnv *env, jclass clazz, jlong ptr,
 JNIEXPORT void JNICALL
 Java_mao_commons_jlua_LuaJNI_checkType0(JNIEnv *env, jclass clazz, jlong ptr, jint arg, jint t) {
     lua_State *l = jlong_to_ptr(ptr);
-    luaL_checktype(l,arg,t);
+    luaL_checktype(l, arg, t);
 }
 
 JNIEXPORT jint JNICALL

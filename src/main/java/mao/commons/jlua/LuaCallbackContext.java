@@ -35,9 +35,9 @@ public class LuaCallbackContext {
     @Override
     protected void finalize() throws Throwable {
         synchronized (this) {
-            if (ref != LuaJNI.LUA_NOREF) {
+            if (ref != LuaState.LUA_NOREF) {
                 l.unref(LuaJNI.LUA_REGISTRYINDEX, ref);
-                ref = LuaJNI.LUA_NOREF;
+                ref = LuaState.LUA_NOREF;
             }
         }
     }
