@@ -41,18 +41,6 @@ static int myLoadFile(lua_State *l, const char *fname) {
     return status;
 }
 
-static int luaA_setsearcher(lua_State *L, lua_CFunction fn) {
-    lua_getglobal(L, LUA_LOADLIBNAME);
-    if (lua_istable(L, -1)) {
-        lua_getfield(L, -1, "searchers");
-        if (lua_istable(L, -1)) {
-            lua_pushcfunction(L, fn);
-            lua_rawseti(L, -2, 2);
-            return 0;
-        }
-    }
-    return -1;
-}
 
 static int luaA_custom_searcher(lua_State *L) {
     const char *fname = luaL_checklstring(L, 1, NULL);
@@ -66,6 +54,21 @@ static int luaA_custom_searcher(lua_State *L) {
     return 0;
 }
 
+static int luaA_setsearcher(lua_State *L) {
+    lua_getglobal(L, LUA_LOADLIBNAME);
+    if (lua_istable(L, -1)) {
+        lua_getfield(L, -1, "searchers");
+        if (lua_istable(L, -1)) {
+            lua_pushcfunction(L, luaA_custom_searcher);
+            lua_rawseti(L, -2, 2);
+            lua_pop(L, 2);
+            return 0;
+        }
+        lua_pop(L, 1);
+    }
+    lua_pop(L, 1);
+    return -1;
+}
 
 static int dofilecont(lua_State *L, int d1, lua_KContext d2) {
     (void) d1;
@@ -95,13 +98,12 @@ static int luaA_loadfile(lua_State *L) {
 
 JNIEXPORT void JNICALL
 Java_mao_commons_jlua_LuaAndroid_setup0(JNIEnv *env, jclass clazz, jlong ptr, jobject finder) {
-    //测试
     lua_State *l = jlong_to_ptr(ptr);
     lua_pushstring(l, RESOURCE_FINDER);
     pushJavaObject(env, l, finder);
     lua_settable(l, LUA_REGISTRYINDEX);
 
-    luaA_setsearcher(l, luaA_custom_searcher);
+    luaA_setsearcher(l);
 
     lua_register(l, "loadfile", luaA_loadfile);
     lua_register(l, "dofile", luaA_dofile);
