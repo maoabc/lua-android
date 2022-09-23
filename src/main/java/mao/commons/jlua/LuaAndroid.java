@@ -15,6 +15,7 @@ public class LuaAndroid {
      */
     public static LuaState newLuaState(ResourceFinder finder) {
         final LuaState luaState = LuaState.create();
+        luaState.pushCFunction(FunctionUtils.traceback());
         setup(luaState, finder);
         new LuaJavaLib(luaState);
         return luaState;

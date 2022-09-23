@@ -1,12 +1,12 @@
 package mao.commons.jlua.luajava;
 
 
-import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import mao.commons.jlua.CJFunction;
+import mao.commons.jlua.LuaException;
 import mao.commons.jlua.LuaState;
 
 /**
@@ -18,7 +18,7 @@ public class ReflectionObject {
         @Override
         protected int call(LuaState luaState) throws Throwable {
             final Object obj = luaState.checkJavaObject(-2);
-            final String name = luaState.checkLString(-1);
+            final String name = luaState.checkString(-1);
 
             //匹配field,且读取对应的值
             final Field field = ReflectionUtils.getField(obj, name);
@@ -65,7 +65,7 @@ public class ReflectionObject {
                     } else if (value instanceof Double) {
                         luaState.pushNumber((Double) value);
                     } else {
-                        ReflectionObject.registerObject(luaState, value);
+                        ReflectionObject.pushObject(luaState, value);
                     }
                 }
                 return 1;
@@ -77,9 +77,7 @@ public class ReflectionObject {
             }
 
             //找不到field或者method
-            luaState.pushString(obj.getClass().getName() + "No such field or method: " + name);
-            luaState.error();
-            return 0;
+            throw new LuaException(obj.getClass().getName() + " No such field or method: " + name);
 
         }
     };
@@ -93,25 +91,19 @@ public class ReflectionObject {
     private static final CJFunction methodInvokeFunction = new CJFunction() {
         @Override
         protected int call(LuaState luaState) throws Throwable {
-            final String name = luaState.checkLString(LuaState.upValueIndex(1));
+            final String name = luaState.checkString(LuaState.upValueIndex(1));
             //第一个参数为对象
             final Object obj = luaState.checkJavaObject(1);
-            try {
-                final Object ret = invoke(luaState, obj, name, luaState.getTop() - 1);
-                if (ret instanceof String) {
-                    luaState.pushString((String) ret);
-                }
-                return 1;
-            } catch (Exception e) {
-                luaState.pushString(e.toString());
-                luaState.error();
+            final Object ret = invoke(luaState, obj, name, luaState.getTop() - 1);
+            if (ret instanceof String) {
+                luaState.pushString((String) ret);
             }
-            return 0;
+            return 1;
         }
     };
 
 
-    public static void registerObject(LuaState l, Object obj) {
+    public static void pushObject(LuaState l, Object obj) {
 
         l.pushJavaObject(obj);
 
@@ -120,11 +112,6 @@ public class ReflectionObject {
         l.pushString("__index");
         l.pushFunction(indexFunc);
         l.rawSet(-3);
-
-        l.pushString("__newindex");
-        l.pushFunction(newIndexFunc);
-        l.rawSet(-3);
-
 
         l.pop(1);
     }

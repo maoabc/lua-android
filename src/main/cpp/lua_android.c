@@ -81,7 +81,7 @@ static int luaA_dofile(lua_State *L) {
     const char *fname = luaL_optstring(L, 1, NULL);
     lua_settop(L, 1);
     if (myLoadFile(L, fname) != LUA_OK)
-        return 0;
+        return lua_error(L);
     lua_callk(L, 0, LUA_MULTRET, 0, dofilecont);
     return dofilecont(L, 0, 0);
 }

@@ -22,14 +22,13 @@
         if (str != NULL) {                                                           \
             const char *utfChars = (*_env)->GetStringUTFChars(_env, str, NULL);      \
             lua_pushstring(_L, utfChars);                                            \
-            lua_error(_L);                                                           \
             (*_env)->ReleaseStringUTFChars(_env, str, utfChars);                     \
             (*_env)->DeleteLocalRef(_env, str);                                      \
         }                                                                            \
         (*_env)->DeleteLocalRef(_env, occurred);                                     \
+        lua_error(_L);                                                               \
     }                                                                                \
 }
-
 
 
 static void callback(ffi_cif *cif,
@@ -100,6 +99,7 @@ Java_mao_commons_jlua_CJFunction_getJFunction0(JNIEnv *env, jclass clazz, jlong 
 JNIEXPORT void JNICALL
 Java_mao_commons_jlua_CJFunction_freeClosure0(JNIEnv *env, jclass clazz, jlong ptr) {
     callback_func_st *funcSt = jlong_to_ptr(ptr);
+    (*env)->DeleteWeakGlobalRef(env, funcSt->closure.user_data);
     ffi_closure_free(funcSt);
 
 }

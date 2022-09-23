@@ -13,6 +13,8 @@ add_library(jlua SHARED
         jni_init.c
         lua_test.c
         lua_android.c
+
+        native_functions.c
         )
 
 target_link_libraries(jlua log lua_static ffi_static)

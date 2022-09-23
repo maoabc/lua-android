@@ -54,7 +54,6 @@ class LuaJNI {
 
     static native Object checkJavaObject0(long ptr, int arg);
 
-
     static native void pushString0(long ptr, String str);
 
     static native boolean isString0(long ptr, int idx);
@@ -84,8 +83,6 @@ class LuaJNI {
     static native void setGlobal0(long ptr, @NonNull String global);
 
     static native int getGlobal0(long ptr, @NonNull String global);
-
-    static native int error0(long ptr);
 
     static native int type0(long ptr, int idx);
 
@@ -119,7 +116,7 @@ class LuaJNI {
 
     static native void openLibs0(long ptr);
 
-    static native int checkInteger0(long ptr, int arg);
+    static native long checkInteger0(long ptr, int arg);
 
     static native String checkLString0(long ptr, int arg);
 

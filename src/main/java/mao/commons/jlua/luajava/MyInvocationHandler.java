@@ -3,21 +3,22 @@ package mao.commons.jlua.luajava;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
-import mao.commons.jlua.LuaCallbackContext;
+import mao.commons.jlua.LuaJavaCallbackContext;
 import mao.commons.jlua.LuaException;
 import mao.commons.jlua.LuaState;
 
 public class MyInvocationHandler implements InvocationHandler {
 
-    private final LuaCallbackContext context;
+    private final LuaJavaCallbackContext context;
 
-    public MyInvocationHandler(LuaCallbackContext context) {
-        this.context = context;
+    public MyInvocationHandler(LuaState luaState) {
+        this.context = new LuaJavaCallbackContext(luaState);
     }
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         final LuaState l = context.l;
+        final int type = l.type(-1);
         if (l.getField(-1, method.getName()) != LuaState.LUA_TFUNCTION) {
             throw new LuaException("No implementation method " + method.getName());
         }
@@ -122,7 +123,7 @@ public class MyInvocationHandler implements InvocationHandler {
                 if (argCls == String.class) {
                     l.pushString((String) arg);
                 } else {
-                    ReflectionObject.registerObject(l, arg);
+                    ReflectionObject.pushObject(l, arg);
                 }
             }
         }

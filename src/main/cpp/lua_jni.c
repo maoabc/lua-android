@@ -146,12 +146,13 @@ Java_mao_commons_jlua_LuaJNI_pushString0(JNIEnv *env, jclass clazz, jlong ptr, j
     const char *string;
     if (utf_len < sizeof(buf) - 1) {//使用栈上内存
         (*env)->GetStringUTFRegion(env, str, 0, (*env)->GetStringLength(env, str), buf);
+        buf[utf_len] = 0;
         string = buf;
     } else {
         string = (*env)->GetStringUTFChars(env, str, NULL);
     }
 
-    lua_pushlstring(l, string, utf_len);
+    lua_pushstring(l, string);
 
     if (string != buf) {
         (*env)->ReleaseStringUTFChars(env, str, string);
@@ -201,8 +202,7 @@ void pushJavaObject(JNIEnv *env, lua_State *l, jobject *obj) {
     lua_rawset(l, -3);
 
     if (lua_setmetatable(l, -2) == 0) {
-        lua_pushstring(l, "Cannot create table to java object.");
-        lua_error(l);
+        throw_LuaException(env, "Cannot create table to java object.");
     }
 }
 
@@ -230,7 +230,7 @@ JNIEXPORT jobject JNICALL
 Java_mao_commons_jlua_LuaJNI_checkJavaObject0(JNIEnv *env, jclass clazz, jlong ptr, jint arg) {
     lua_State *l = jlong_to_ptr(ptr);
     if (!isJavaObject(l, arg)) {
-        luaL_argerror(l, arg, "Not java object");
+        throw_LuaException(env, "Not java object");
         return 0;
     }
     jobject *object = lua_touserdata(l, arg);
@@ -270,13 +270,6 @@ Java_mao_commons_jlua_LuaJNI_getMetatable0(JNIEnv *env, jclass clazz, jlong ptr,
 }
 
 
-JNIEXPORT void JNICALL
-Java_mao_commons_jlua_LuaJNI_call0(JNIEnv *env, jclass clazz, jlong ptr, jint nargs,
-                                   jint nresults) {
-    lua_State *l = jlong_to_ptr(ptr);
-    lua_call(l, nargs, nresults);
-}
-
 JNIEXPORT int JNICALL
 Java_mao_commons_jlua_LuaJNI_pcall0(JNIEnv *env, jclass clazz, jlong ptr, jint nargs, jint nresults,
                                     jint errfunc) {
@@ -308,11 +301,6 @@ Java_mao_commons_jlua_LuaJNI_getGlobal0(JNIEnv *env, jclass clazz, jlong ptr, js
     return ret;
 }
 
-JNIEXPORT jint JNICALL
-Java_mao_commons_jlua_LuaJNI_error0(JNIEnv *env, jclass clazz, jlong ptr) {
-    lua_State *l = jlong_to_ptr(ptr);
-    return lua_error(l);
-}
 
 JNIEXPORT jint JNICALL
 Java_mao_commons_jlua_LuaJNI_type0(JNIEnv *env, jclass clazz, jlong ptr, jint idx) {

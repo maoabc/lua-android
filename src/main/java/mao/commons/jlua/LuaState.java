@@ -55,6 +55,10 @@ public class LuaState implements Closeable {
     }
 
     public int checkInt(int arg) {
+        return (int) LuaJNI.checkInteger0(ptr, arg);
+    }
+
+    public long checkInt64(int arg) {
         return LuaJNI.checkInteger0(ptr, arg);
     }
 
@@ -66,7 +70,12 @@ public class LuaState implements Closeable {
         LuaJNI.pushClosure0(ptr, function.getCFunction(), 0);
     }
 
-    void pushCClosure(long funcPtr, int n) {
+
+    public void pushCFunction(long funcPtr) {
+        LuaJNI.pushClosure0(ptr, funcPtr, 0);
+    }
+
+    public void pushCClosure(long funcPtr, int n) {
         LuaJNI.pushClosure0(ptr, funcPtr, n);
     }
 
@@ -112,7 +121,13 @@ public class LuaState implements Closeable {
     }
 
     public void call(int nargs, int nresults) {
-        LuaJNI.pcall0(ptr, nargs, nresults, 0);
+        if (LuaJNI.pcall0(ptr, nargs, nresults, 1) != LUA_OK) {
+            String traceback = "";
+            if (isString(-1)) {
+                traceback = toLString(-1);
+            }
+            throw new LuaException(traceback);
+        }
     }
 
     public int pcall(int nargs, int nresults, int errfunc) {
@@ -143,6 +158,10 @@ public class LuaState implements Closeable {
         return LuaJNI.isString0(ptr, idx);
     }
 
+    public boolean isFunction(int idx) {
+        return LuaJNI.type0(ptr, idx) == LUA_TFUNCTION;
+    }
+
     public boolean isTable(int idx) {
         return LuaJNI.type0(ptr, idx) == LUA_TTABLE;
     }
@@ -155,15 +174,15 @@ public class LuaState implements Closeable {
         }
     }
 
-    public String checkLString(int arg) {
+    public String checkString(int arg) {
         return LuaJNI.checkLString0(ptr, arg);
     }
 
-    public String optLString(int idx, String def) {
+    public String optString(int idx, String def) {
         if (type(idx) <= 0) {
             return def;
         }
-        return checkLString(idx);
+        return checkString(idx);
     }
 
     public int optInt(int idx, int def) {
@@ -180,9 +199,6 @@ public class LuaState implements Closeable {
         return toBoolean(idx);
     }
 
-    public void error() {
-        LuaJNI.error0(ptr);
-    }
 
     public int type(int idx) {
         return LuaJNI.type0(ptr, idx);
@@ -315,6 +331,7 @@ public class LuaState implements Closeable {
         public void close() {
             synchronized (this) {
                 if (ptr != 0) {
+                    System.out.println("lua state finalize " + ptr);
                     LuaJNI.close0(ptr);
                     ptr = 0;
                 }

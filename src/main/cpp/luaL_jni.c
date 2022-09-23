@@ -48,28 +48,35 @@ Java_mao_commons_jlua_LuaJNI_openLibs0(JNIEnv *env, jclass clazz, jlong ptr) {
 }
 
 
-JNIEXPORT jint JNICALL
+JNIEXPORT jlong JNICALL
 Java_mao_commons_jlua_LuaJNI_checkInteger0(JNIEnv *env, jclass clazz, jlong ptr, jint arg) {
     lua_State *l = jlong_to_ptr(ptr);
-    return (jint) luaL_checkinteger(l, arg);
+    int isnum;
+    lua_Integer d = lua_tointegerx(l, arg, &isnum);
+    if (!isnum) {
+        throw_LuaException(env, "number has no integer representation");
+    }
+    return d;
 }
 
 JNIEXPORT jstring JNICALL
 Java_mao_commons_jlua_LuaJNI_checkLString0(JNIEnv *env, jclass clazz, jlong ptr, jint arg) {
     lua_State *l = jlong_to_ptr(ptr);
 
-    const char *string = luaL_checklstring(l, arg, NULL);
-    if (string == NULL) {
-        return NULL;
+    const char *s = lua_tolstring(l, arg, NULL);
+    if (!s) {
+        throw_LuaException(env, "no string");
     }
-    return (*env)->NewStringUTF(env, string);
+    return (*env)->NewStringUTF(env, s);
 }
 
 
 JNIEXPORT void JNICALL
 Java_mao_commons_jlua_LuaJNI_checkType0(JNIEnv *env, jclass clazz, jlong ptr, jint arg, jint t) {
     lua_State *l = jlong_to_ptr(ptr);
-    luaL_checktype(l, arg, t);
+    if (lua_type(l, arg) != t) {
+        throw_LuaException(env, lua_typename(l, t));
+    }
 }
 
 JNIEXPORT jint JNICALL
