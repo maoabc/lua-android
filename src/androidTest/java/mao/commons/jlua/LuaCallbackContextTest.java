@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import mao.commons.jlua.luajava.LuaJavaLib;
 
-public class LuaJavaCallbackContextTest {
+public class LuaCallbackContextTest {
 
 
     //保证加载native库
@@ -33,7 +33,7 @@ public class LuaJavaCallbackContextTest {
         );
         luaState.pcall(0, 1, 0);
         final int type = luaState.type(-1);
-        final LuaJavaCallbackContext context = new LuaJavaCallbackContext(luaState);
+        final LuaCallbackContext context = new LuaCallbackContext(luaState);
         final int type2 = context.l.type(1);
         final int type5 = context.l.type(-1);
         final int top = context.l.getTop();

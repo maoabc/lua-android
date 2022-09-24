@@ -3,16 +3,16 @@ package mao.commons.jlua.luajava;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
-import mao.commons.jlua.LuaJavaCallbackContext;
+import mao.commons.jlua.LuaCallbackContext;
 import mao.commons.jlua.LuaException;
 import mao.commons.jlua.LuaState;
 
 public class MyInvocationHandler implements InvocationHandler {
 
-    private final LuaJavaCallbackContext context;
+    private final LuaCallbackContext context;
 
     public MyInvocationHandler(LuaState luaState) {
-        this.context = new LuaJavaCallbackContext(luaState);
+        this.context = new LuaCallbackContext(luaState);
     }
 
     @Override
