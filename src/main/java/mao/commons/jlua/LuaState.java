@@ -83,6 +83,10 @@ public class LuaState implements Closeable {
         LuaJNI.remove0(ptr, idx);
     }
 
+    public void insert(int idx) {
+        LuaJNI.insert0(ptr, idx);
+    }
+
     public void pushInt32(int i) {
         LuaJNI.pushInteger0(ptr, i);
     }

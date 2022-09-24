@@ -44,29 +44,7 @@ public class ReflectionObject {
                 } else {
                     //对象类型
                     final Object value = field.get(obj);
-                    if (value == null) {
-                        luaState.pushNil();
-                    } else if (value instanceof Integer) {
-                        luaState.pushInt64((Integer) value);
-                    } else if (value instanceof String) {
-                        luaState.pushString((String) value);
-                    } else if (value instanceof Boolean) {
-                        luaState.pushBoolean((Boolean) value);
-                    } else if (value instanceof Byte) {
-                        luaState.pushInt64((Byte) value);
-                    } else if (value instanceof Short) {
-                        luaState.pushInt64((Short) value);
-                    } else if (value instanceof Character) {
-                        luaState.pushInt64((Character) value);
-                    } else if (value instanceof Long) {
-                        luaState.pushInt64((Long) value);
-                    } else if (value instanceof Float) {
-                        luaState.pushNumber((Float) value);
-                    } else if (value instanceof Double) {
-                        luaState.pushNumber((Double) value);
-                    } else {
-                        ReflectionObject.pushObject(luaState, value);
-                    }
+                    pushJavaValue(luaState, value);
                 }
                 return 1;
             }
@@ -81,6 +59,33 @@ public class ReflectionObject {
 
         }
     };
+
+    private static void pushJavaValue(LuaState luaState, Object value) {
+        if (value == null) {
+            luaState.pushNil();
+        } else if (value instanceof Integer) {
+            luaState.pushInt64((Integer) value);
+        } else if (value instanceof String) {
+            luaState.pushString((String) value);
+        } else if (value instanceof Boolean) {
+            luaState.pushBoolean((Boolean) value);
+        } else if (value instanceof Byte) {
+            luaState.pushInt64((Byte) value);
+        } else if (value instanceof Short) {
+            luaState.pushInt64((Short) value);
+        } else if (value instanceof Character) {
+            luaState.pushInt64((Character) value);
+        } else if (value instanceof Long) {
+            luaState.pushInt64((Long) value);
+        } else if (value instanceof Float) {
+            luaState.pushNumber((Float) value);
+        } else if (value instanceof Double) {
+            luaState.pushNumber((Double) value);
+        } else {
+            ReflectionObject.pushObject(luaState, value);
+        }
+    }
+
     private static final CJFunction newIndexFunc = new CJFunction() {
         @Override
         protected int call(LuaState luaState) throws Throwable {
@@ -91,13 +96,10 @@ public class ReflectionObject {
     private static final CJFunction methodInvokeFunction = new CJFunction() {
         @Override
         protected int call(LuaState luaState) throws Throwable {
-            final String name = luaState.checkString(LuaState.upValueIndex(1));
+            final String methodName = luaState.checkString(LuaState.upValueIndex(1));
             //第一个参数为对象
-            final Object obj = luaState.checkJavaObject(1);
-            final Object ret = invoke(luaState, obj, name, luaState.getTop() - 1);
-            if (ret instanceof String) {
-                luaState.pushString((String) ret);
-            }
+            final Object ret = invoke(luaState, luaState.checkJavaObject(1), methodName, luaState.getTop() - 1);
+            pushJavaValue(luaState, ret);
             return 1;
         }
     };

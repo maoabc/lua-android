@@ -66,6 +66,7 @@ Java_mao_commons_jlua_LuaJNI_checkLString0(JNIEnv *env, jclass clazz, jlong ptr,
     const char *s = lua_tolstring(l, arg, NULL);
     if (!s) {
         throw_LuaException(env, "no string");
+        return NULL;
     }
     return (*env)->NewStringUTF(env, s);
 }

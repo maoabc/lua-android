@@ -108,6 +108,8 @@ class LuaJNI {
 
     static native boolean next0(long ptr, int idx);
 
+    static native void insert0(long ptr,int idx);
+
 
     //lauxlib.h
     static native int loadBufferx0(long ptr, @NonNull byte[] buffer,

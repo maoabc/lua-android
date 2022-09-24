@@ -401,6 +401,12 @@ Java_mao_commons_jlua_LuaJNI_next0(JNIEnv *env, jclass clazz, jlong ptr, jint id
     return lua_next(l, idx);
 }
 
+JNIEXPORT void JNICALL
+Java_mao_commons_jlua_LuaJNI_insert0(JNIEnv *env, jclass clazz, jlong ptr, jint idx) {
+    lua_State *l = jlong_to_ptr(ptr);
+    lua_insert(l, idx);
+}
+
 
 JNIEXPORT void JNICALL
 Java_mao_commons_jlua_LuaJNI_close0(JNIEnv *env, jclass clazz, jlong ptr) {
