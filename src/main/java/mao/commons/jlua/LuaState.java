@@ -44,7 +44,9 @@ public class LuaState implements Closeable {
     }
 
     public static LuaState create() {
-        return new FinalizeLuaState();
+        final FinalizeLuaState finalizeLuaState = new FinalizeLuaState();
+        finalizeLuaState.openLibs();
+        return finalizeLuaState;
     }
 
     static LuaState wrap(long ptr) {
@@ -52,6 +54,10 @@ public class LuaState implements Closeable {
             throw new IllegalArgumentException("ptr is null");
         }
         return new LuaState(ptr);
+    }
+
+    public void openLibs() {
+        LuaJNI.openLibs0(ptr);
     }
 
     public int checkInt(int arg) {

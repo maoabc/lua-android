@@ -96,7 +96,7 @@ static int luaA_loadfile(lua_State *L) {
     return 0;
 }
 
-JNIEXPORT void JNICALL
+static void
 Java_mao_commons_jlua_LuaAndroid_setup0(JNIEnv *env, jclass clazz, jlong ptr, jobject finder) {
     lua_State *l = jlong_to_ptr(ptr);
     lua_pushstring(l, RESOURCE_FINDER);
@@ -109,8 +109,34 @@ Java_mao_commons_jlua_LuaAndroid_setup0(JNIEnv *env, jclass clazz, jlong ptr, jo
     lua_register(l, "dofile", luaA_dofile);
 }
 
+#define NELEM(x) ((int) (sizeof(x) / sizeof((x)[0])))
+
+
+static const JNINativeMethod methods[] = {
+        {"setup0", "(JLmao/commons/jlua/ResourceFinder;)V",
+         (void *) Java_mao_commons_jlua_LuaAndroid_setup0},
+
+};
+
+
+static jboolean registerNativeMethods(JNIEnv *env) {
+    jclass clazz = (*env)->FindClass(env, "mao/commons/jlua/LuaAndroid");
+    if (clazz == NULL) {
+        return JNI_FALSE;
+    }
+    if ((*env)->RegisterNatives(env, clazz, methods, NELEM(methods)) < 0) {
+        (*env)->DeleteLocalRef(env, clazz);
+        return JNI_FALSE;
+    }
+    (*env)->DeleteLocalRef(env, clazz);
+
+    return JNI_TRUE;
+}
+
 void register_lua_android(JNIEnv *env) {
     jclass cls = (*env)->FindClass(env, "mao/commons/jlua/ResourceFinder");
     findResourceMethodId = (*env)->GetMethodID(env, cls, "findResource", "(Ljava/lang/String;)[B");
     (*env)->DeleteLocalRef(env, cls);
+
+    registerNativeMethods(env);
 }

@@ -58,7 +58,7 @@ typedef struct {
 
 } callback_func_st;
 
-JNIEXPORT jlong JNICALL
+static jlong
 Java_mao_commons_jlua_CJFunction_createClosure0(JNIEnv *env, jclass clazz, jobject function) {
 
     callback_func_st *funcSt;
@@ -84,22 +84,54 @@ Java_mao_commons_jlua_CJFunction_createClosure0(JNIEnv *env, jclass clazz, jobje
     return ptr_to_jlong(funcSt);
 }
 
-JNIEXPORT jlong JNICALL
+static jlong
 Java_mao_commons_jlua_CJFunction_getCFunction0(JNIEnv *env, jclass clazz, jlong ptr) {
     callback_func_st *funcSt = jlong_to_ptr(ptr);
     return ptr_to_jlong(funcSt->func);
 }
 
-JNIEXPORT jobject JNICALL
+static jobject
 Java_mao_commons_jlua_CJFunction_getJFunction0(JNIEnv *env, jclass clazz, jlong ptr) {
     callback_func_st *funcSt = jlong_to_ptr(ptr);
     return (jobject) funcSt->closure.user_data;
 }
 
-JNIEXPORT void JNICALL
+static void
 Java_mao_commons_jlua_CJFunction_freeClosure0(JNIEnv *env, jclass clazz, jlong ptr) {
     callback_func_st *funcSt = jlong_to_ptr(ptr);
     (*env)->DeleteWeakGlobalRef(env, funcSt->closure.user_data);
     ffi_closure_free(funcSt);
 
 }
+
+
+
+#define NELEM(x) ((int) (sizeof(x) / sizeof((x)[0])))
+
+
+static const JNINativeMethod methods[] = {
+        {"createClosure0", "(Lmao/commons/jlua/JFunction;)J", (void *) Java_mao_commons_jlua_CJFunction_createClosure0},
+
+        {"getCFunction0",  "(J)J",                            (void *) Java_mao_commons_jlua_CJFunction_getCFunction0},
+
+        {"getJFunction0",  "(J)Lmao/commons/jlua/JFunction;", (void *) Java_mao_commons_jlua_CJFunction_getJFunction0},
+
+        {"freeClosure0",   "(J)V",                            (void *) Java_mao_commons_jlua_CJFunction_freeClosure0},
+
+};
+
+
+jboolean register_ffi_function(JNIEnv *env) {
+    jclass clazz = (*env)->FindClass(env, "mao/commons/jlua/CJFunction");
+    if (clazz == NULL) {
+        return JNI_FALSE;
+    }
+    if ((*env)->RegisterNatives(env, clazz, methods, NELEM(methods)) < 0) {
+        (*env)->DeleteLocalRef(env, clazz);
+        return JNI_FALSE;
+    }
+    (*env)->DeleteLocalRef(env,clazz);
+
+    return JNI_TRUE;
+}
+

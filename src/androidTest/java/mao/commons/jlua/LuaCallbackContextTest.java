@@ -47,7 +47,7 @@ public class LuaCallbackContextTest {
     public void testCreateProxy() {
         final LuaState luaState = LuaState.create();
         new LuaJavaLib(luaState);
-        luaState.pushCFunction(FunctionUtils.traceback());
+        luaState.pushCFunction(UtilFunctions.traceback());
 
         luaState.loadBuffer("" +
                 "local a={\n" +
@@ -127,7 +127,7 @@ public class LuaCallbackContextTest {
     public void testIterTable() {
         final LuaState luaState = LuaState.create();
         final int top = luaState.getTop();
-        luaState.pushCFunction(FunctionUtils.traceback());
+        luaState.pushCFunction(UtilFunctions.traceback());
         luaState.loadBuffer("dddd=fljlc+34-67\nreturn {1,3}");
         final int top2 = luaState.getTop();
         final int pcall = luaState.pcall(0, 1, -2);

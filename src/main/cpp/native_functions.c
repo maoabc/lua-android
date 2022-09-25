@@ -17,8 +17,29 @@ static int traceback(lua_State *L) {
 }
 
 
-JNIEXPORT jlong JNICALL
-Java_mao_commons_jlua_FunctionUtils_traceback(JNIEnv *env, jclass clazz) {
+static jlong
+Java_mao_commons_jlua_UtilFunctions_traceback(JNIEnv *env, jclass clazz) {
     return ptr_to_jlong(traceback);
+}
+
+
+#define NELEM(x) ((int) (sizeof(x) / sizeof((x)[0])))
+
+static const JNINativeMethod methods[] = {
+        {"traceback", "()J", (void *) Java_mao_commons_jlua_UtilFunctions_traceback},
+
+};
+
+
+jboolean register_util_functions(JNIEnv *env) {
+    jclass clazz = (*env)->FindClass(env, "mao/commons/jlua/UtilFunctions");
+    if (clazz == NULL) {
+        return JNI_FALSE;
+    }
+    if ((*env)->RegisterNatives(env, clazz, methods, NELEM(methods)) < 0) {
+        return JNI_FALSE;
+    }
+
+    return JNI_TRUE;
 }
 
