@@ -341,7 +341,6 @@ public class LuaState implements Closeable {
         public void close() {
             synchronized (this) {
                 if (ptr != 0) {
-                    System.out.println("lua state finalize " + ptr);
                     LuaJNI.close0(ptr);
                     ptr = 0;
                 }
