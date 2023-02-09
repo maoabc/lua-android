@@ -21,6 +21,13 @@ public class LuaAndroid {
         return luaState;
     }
 
+    public static LuaState newLuaStateNoJavaLib(ResourceFinder finder) {
+        final LuaState luaState = LuaState.create();
+        luaState.pushCFunction(UtilFunctions.traceback());
+        setup(luaState, finder);
+        return luaState;
+    }
+
     public static void setup(LuaState l, ResourceFinder finder) {
         setup0(l.ptr, finder);
     }
