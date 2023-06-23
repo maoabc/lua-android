@@ -2,9 +2,9 @@
 // Created by mao on 2022/7/28.
 //
 #include <jni.h>
+#include "utils.h"
 #include "lua.h"
 #include "lauxlib.h"
-#include "utils.h"
 
 typedef struct {
     lua_State *L;

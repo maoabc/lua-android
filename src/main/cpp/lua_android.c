@@ -3,10 +3,10 @@
 //
 #include <jni.h>
 #include <stdio.h>
+#include "utils.h"
 #include <lauxlib.h>
 #include <luaconf.h>
 #include "lualib.h"
-#include "utils.h"
 
 #include "lua_jni.h"
 

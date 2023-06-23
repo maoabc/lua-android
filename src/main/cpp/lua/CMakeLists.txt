@@ -39,6 +39,7 @@ set(SRC_FILES
         src/ltm.c
         src/lopcodes.c
 
+        src/android_log.c
         )
 
 add_definitions(-DLUA_USE_C99 -Wall -Wextra )

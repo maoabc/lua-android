@@ -247,6 +247,7 @@ typedef struct luaL_Stream {
 ** ===================================================================
 */
 
+#include "android_log.h"
 /* print a string */
 #if !defined(lua_writestring)
 #define lua_writestring(s,l)   fwrite((s), sizeof(char), (l), stdout)

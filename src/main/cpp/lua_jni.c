@@ -1,10 +1,10 @@
 #include <jni.h>
+#include "utils.h"
 #include "lualib.h"
 #include "lapi.h"
 #include "lauxlib.h"
 
 #include "lua_jni.h"
-#include "utils.h"
 
 #define LOG_TAG "ffi"
 

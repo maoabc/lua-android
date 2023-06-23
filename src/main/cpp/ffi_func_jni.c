@@ -3,11 +3,11 @@
 //
 
 #include <jni.h>
+#include "utils.h"
 #include "lua.h"
 #include "lapi.h"
 #include "lauxlib.h"
 #include "ffi.h"
-#include "utils.h"
 
 
 #define CHECK_JAVA_EXCEPTION(_env, _L)                                               \
