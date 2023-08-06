@@ -73,11 +73,14 @@ Java_mao_commons_jlua_CJFunction_createClosure0(JNIEnv *env, jclass clazz, jobje
 
 
     if (ffi_prep_cif(&funcSt->cif, FFI_DEFAULT_ABI, 1, &ffi_type_sint32, funcSt->args) != FFI_OK) {
+        ffi_closure_free(funcSt);
         throw_LuaException(env, "create native closure failed");
         return 0;
     }
     jobject weakFunc = (*env)->NewWeakGlobalRef(env, function);
     if (ffi_prep_closure_loc(&funcSt->closure, &funcSt->cif, callback, weakFunc, func) != FFI_OK) {
+        (*env)->DeleteWeakGlobalRef(env, weakFunc);
+        ffi_closure_free(funcSt);
         throw_LuaException(env, "create native closure failed");
         return 0;
     }
@@ -105,7 +108,6 @@ Java_mao_commons_jlua_CJFunction_freeClosure0(JNIEnv *env, jclass clazz, jlong p
 }
 
 
-
 #define NELEM(x) ((int) (sizeof(x) / sizeof((x)[0])))
 
 
@@ -130,7 +132,7 @@ jboolean register_ffi_function(JNIEnv *env) {
         (*env)->DeleteLocalRef(env, clazz);
         return JNI_FALSE;
     }
-    (*env)->DeleteLocalRef(env,clazz);
+    (*env)->DeleteLocalRef(env, clazz);
 
     return JNI_TRUE;
 }
