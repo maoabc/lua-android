@@ -47,8 +47,10 @@ static int luaA_custom_searcher(lua_State *L) {
     if (fname) {
         char filename[1024];
         snprintf(filename, sizeof(filename), "%s.lua", fname);
-        if (myLoadFile(L, filename) != LUA_OK)
+        if (myLoadFile(L, filename) != LUA_OK) {
+            lua_error(L);
             return 0;
+        }
         return 1;
     }
     return 0;
@@ -89,8 +91,10 @@ static int luaA_dofile(lua_State *L) {
 static int luaA_loadfile(lua_State *L) {
     const char *fname = luaL_checklstring(L, 1, NULL);
     if (fname) {
-        if (myLoadFile(L, fname) != LUA_OK)
+        if (myLoadFile(L, fname) != LUA_OK) {
+            lua_error(L);
             return 0;
+        }
         return 1;
     }
     return 0;
