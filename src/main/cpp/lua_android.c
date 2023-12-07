@@ -14,7 +14,7 @@
 static jmethodID findResourceMethodId;
 
 static int myLoadFile(lua_State *l, const char *fname) {
-    int status = -1;
+    int status = LUA_OK;
     lua_pushstring(l, RESOURCE_FINDER);
     lua_gettable(l, LUA_REGISTRYINDEX);
     jobject *finder = lua_touserdata(l, -1);
@@ -35,6 +35,12 @@ static int myLoadFile(lua_State *l, const char *fname) {
             (*env)->ReleaseByteArrayElements(env, data, buff, JNI_ABORT);
 
             (*env)->DeleteLocalRef(env, data);
+        } else {
+            if ((*env)->ExceptionCheck(env)) {
+                (*env)->ExceptionClear(env);
+            }
+            lua_pushnil(l);
+            status = LUA_OK;
         }
         (*env)->DeleteLocalRef(env, utf);
     }
