@@ -267,11 +267,13 @@ public class LuaState implements Closeable {
     }
 
     public void loadBuffer(String buf) {
-        LuaJNI.loadBufferx0(ptr, buf.getBytes(), null, null);
+        loadBuffer(buf, null);
     }
 
     public void loadBuffer(String buf, String name) {
-        LuaJNI.loadBufferx0(ptr, buf.getBytes(), name, null);
+        if (LuaJNI.loadBufferx0(ptr, buf.getBytes(), name, null) != LUA_OK) {
+            throw new LuaException(checkString(-1));
+        }
     }
 
     public void setGlobal(String global) {
