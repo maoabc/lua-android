@@ -1,6 +1,7 @@
 package mao.commons.jlua.luajava;
 
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
@@ -33,6 +34,28 @@ public class LuaJavaLib {
             final Object newObj = ReflectionUtils.invokeConstructor(luaState, clazz, luaState.getTop() - 1);
 
             ReflectionObject.pushObject(luaState, newObj);
+
+            return 1;
+        }
+    };
+    private final CJFunction newArrayFunction = new CJFunction() {
+        @Override
+        protected int call(LuaState luaState) throws Throwable {
+            final Class<?> clazz;
+
+            if (luaState.isJavaObject(1)) {
+                clazz = (Class<?>) luaState.checkJavaObject(1);
+            } else if (luaState.isString(1)) {
+                clazz = Class.forName(luaState.checkString(1));
+            } else {
+                throw new LuaException("Not java class or class name");
+            }
+            if (!luaState.isInteger(2)) {
+                throw new LuaException("Not array size");
+            }
+            final Object array = Array.newInstance(clazz, luaState.optInt(2, 0));
+
+            ReflectionObject.pushObject(luaState, array);
 
             return 1;
         }
@@ -87,6 +110,10 @@ public class LuaJavaLib {
         protected int call(LuaState luaState) {
             final String name = luaState.checkString(-1);
             switch (name) {
+                case "newArray": {
+                    luaState.pushFunction(newArrayFunction);
+                    return 1;
+                }
                 case "bindClass":
                     luaState.pushFunction(bindClassFunction);
                     return 1;

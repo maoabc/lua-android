@@ -1,6 +1,7 @@
 package mao.commons.jlua.luajava;
 
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -18,6 +19,23 @@ public class ReflectionObject {
         @Override
         protected int call(LuaState luaState) throws Throwable {
             final Object obj = luaState.checkJavaObject(-2);
+
+            final Class<?> cls = obj.getClass();
+            if (cls.isArray()) {//数组相关
+                int idx = luaState.checkInt(-1);
+                if (idx < 0) {
+                    final int length = Array.getLength(obj);
+                    idx = length - idx;
+                } else if (idx > 0) {
+                    idx--;
+                } else {
+                    throw new LuaException("array index out");
+                }
+                final Object v = Array.get(obj, idx);
+                pushJavaValue(luaState, v);
+                return 1;
+            }
+
             final String name = luaState.checkString(-1);
 
             //匹配field,且读取对应的值
@@ -55,7 +73,7 @@ public class ReflectionObject {
             }
 
             //找不到field或者method
-            throw new LuaException(obj.getClass().getName() + " No such field or method: " + name);
+            throw new LuaException(cls.getName() + " No such field or method: " + name);
 
         }
     };
@@ -89,6 +107,42 @@ public class ReflectionObject {
     private static final CJFunction newIndexFunc = new CJFunction() {
         @Override
         protected int call(LuaState luaState) throws Throwable {
+            final Object arr = luaState.checkJavaObject(1);
+            final Class<?> cls = arr.getClass();
+            if (!cls.isArray()) {
+                throw new LuaException("Not a array object");
+            }
+            int idx = luaState.checkInt(2);
+            if (idx < 0) {
+                final int length = Array.getLength(arr);
+                idx = length - idx;
+            } else if (idx > 0) {
+                idx -= 1;
+            } else {
+                throw new LuaException("array index out");
+            }
+            if (cls == String[].class) {
+                ((String[]) arr)[idx] = luaState.toLString(3);
+            } else if (cls == boolean[].class) {
+                ((boolean[]) arr)[idx] = luaState.toBoolean(3);
+            } else if (cls == byte[].class) {
+                ((byte[]) arr)[idx] = (byte) luaState.toInt32(3);
+            } else if (cls == short[].class) {
+                ((short[]) arr)[idx] = (short) luaState.toInt32(3);
+            } else if (cls == char[].class) {
+                ((char[]) arr)[idx] = (char) luaState.toInt32(3);
+            } else if (cls == int[].class) {
+                ((int[]) arr)[idx] = luaState.toInt32(3);
+            } else if (cls == float[].class) {
+                ((float[]) arr)[idx] = (float) luaState.toNumber(3);
+            } else if (cls == long[].class) {
+                ((long[]) arr)[idx] = luaState.toInt64(3);
+            } else if (cls == double[].class) {
+                ((double[]) arr)[idx] = luaState.toNumber(3);
+            } else {
+                Array.set(arr, idx, luaState.toJavaObject(3));
+            }
+
             return 0;
         }
     };
@@ -113,6 +167,10 @@ public class ReflectionObject {
 
         l.pushString("__index");
         l.pushFunction(indexFunc);
+        l.rawSet(-3);
+
+        l.pushString("__newindex");
+        l.pushFunction(newIndexFunc);
         l.rawSet(-3);
 
         l.pop(1);
