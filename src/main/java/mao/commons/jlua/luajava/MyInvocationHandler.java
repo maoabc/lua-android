@@ -18,73 +18,77 @@ public class MyInvocationHandler implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         final LuaState l = context.l;
-        final int type = l.type(-1);
-        if (l.getField(-1, method.getName()) != LuaState.LUA_TFUNCTION) {
-            throw new LuaException("No implementation method " + method.getName());
-        }
-        int nargs;
-        if (method.isVarArgs()) {
-            //除去最后的变长数组
-            nargs = args.length - 1;
-            parseArgs(args, nargs, l);
-
-            //变长参数
-            final Object[] varargs = (Object[]) args[args.length - 1];
-            parseArgs(varargs, varargs.length, l);
-            nargs += varargs.length;
-        } else {
-            nargs = args.length;
-            parseArgs(args, nargs, l);
-        }
-
-        final Class<?> returnType = method.getReturnType();
-        if (returnType == Void.class || returnType == void.class) {
-            //调用lua函数
-            if (l.pcall(nargs, 0, 1) != 0) {
-                String msg = "";
-                if (l.isString(-1)) {
-                    msg = l.toLString(-1);
-                }
-                throw new LuaException("Lua pcall error: " + msg);
+        try {
+            if (l.getField(-1, method.getName()) != LuaState.LUA_TFUNCTION) {
+                throw new LuaException("No implementation method " + method.getName());
             }
-            return null;
-        } else {
-            //调用lua函数
-            if (l.pcall(nargs, 1, 1) != 0) {
-                String msg = "";
-                if (l.isString(-1)) {
-                    msg = l.toLString(-1);
-                }
-                throw new LuaException("Lua pcall error: " + msg);
-            }
-            final Object ret;
-            if (returnType == int.class || returnType == Integer.class) {
-                ret = l.toInt32(-1);
-            } else if (returnType == String.class) {
-                ret = l.toLString(-1);
-            } else if (returnType == boolean.class || returnType == Boolean.class) {
-                ret = l.toBoolean(-1);
-            } else if (returnType == byte.class || returnType == Byte.class) {
-                ret = (byte) l.toInt64(-1);
-            } else if (returnType == short.class || returnType == Short.class) {
-                ret = (short) l.toInt64(-1);
-            } else if (returnType == char.class || returnType == Character.class) {
-                ret = (char) l.toInt64(-1);
-            } else if (returnType == float.class || returnType == Float.class) {
-                ret = (float) l.toNumber(-1);
-            } else if (returnType == double.class || returnType == Double.class) {
-                ret = l.toNumber(-1);
-            } else if (returnType == long.class || returnType == Long.class) {
-                ret = l.toInt64(-1);
+            int nargs;
+            if (method.isVarArgs()) {
+                //除去最后的变长数组
+                nargs = args.length - 1;
+                parseArgs(args, nargs, l);
+
+                //变长参数
+                final Object[] varargs = (Object[]) args[args.length - 1];
+                parseArgs(varargs, varargs.length, l);
+                nargs += varargs.length;
             } else {
-                if (l.isNil(-1)) {
-                    ret = null;
-                } else {
-                    ret = l.toJavaObject(-1);
-                }
+                nargs = args != null ? args.length : 0;
+                parseArgs(args, nargs, l);
             }
-            l.pop(1);
-            return ret;
+
+            final Class<?> returnType = method.getReturnType();
+            if (returnType == Void.class || returnType == void.class) {
+                //调用lua函数
+                if (l.pcall(nargs, 0, 1) != 0) {
+                    String msg = "";
+                    if (l.isString(-1)) {
+                        msg = l.toLString(-1);
+                    }
+                    throw new LuaException("Lua pcall error: " + msg);
+                }
+                return null;
+            } else {
+                //调用lua函数
+                if (l.pcall(nargs, 1, 1) != 0) {
+                    String msg = "";
+                    if (l.isString(-1)) {
+                        msg = l.toLString(-1);
+                    }
+                    throw new LuaException("Lua pcall error: " + msg);
+                }
+                final Object ret;
+                if (returnType == int.class || returnType == Integer.class) {
+                    ret = l.toInt32(-1);
+                } else if (returnType == String.class) {
+                    ret = l.toLString(-1);
+                } else if (returnType == boolean.class || returnType == Boolean.class) {
+                    ret = l.toBoolean(-1);
+                } else if (returnType == byte.class || returnType == Byte.class) {
+                    ret = (byte) l.toInt64(-1);
+                } else if (returnType == short.class || returnType == Short.class) {
+                    ret = (short) l.toInt64(-1);
+                } else if (returnType == char.class || returnType == Character.class) {
+                    ret = (char) l.toInt64(-1);
+                } else if (returnType == float.class || returnType == Float.class) {
+                    ret = (float) l.toNumber(-1);
+                } else if (returnType == double.class || returnType == Double.class) {
+                    ret = l.toNumber(-1);
+                } else if (returnType == long.class || returnType == Long.class) {
+                    ret = l.toInt64(-1);
+                } else {
+                    if (l.isNil(-1)) {
+                        ret = null;
+                    } else {
+                        ret = l.toJavaObject(-1);
+                    }
+                }
+                l.pop(1);
+                return ret;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
 
     }

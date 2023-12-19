@@ -497,6 +497,14 @@ Java_mao_commons_jlua_LuaJNI_unref0(JNIEnv *env, jclass clazz, jlong ptr, jint t
     luaL_unref(l, t, ref);
 }
 
+//static void
+//Java_mao_commons_jlua_LuaJNI_error0(JNIEnv *env, jclass clazz, jlong ptr, jstring errorMsg) {
+//    lua_State *l = jlong_to_ptr(ptr);
+//    char *error = (*env)->GetStringUTFChars(env, errorMsg, NULL);
+//    luaL_error(l, errorMsg);
+//    (*env)->ReleaseStringUTFChars(env, errorMsg, error);
+//}
+
 
 #define NELEM(x) ((int) (sizeof(x) / sizeof((x)[0])))
 
@@ -603,6 +611,8 @@ static const JNINativeMethod methods[] = {
 
         {"unref0",           "(JII)V",                                     (void *) Java_mao_commons_jlua_LuaJNI_unref0},
 
+//        {"error0",           "(JLjava/lang/String;)V",                     (void *) Java_mao_commons_jlua_LuaJNI_error0},
+
 };
 
 
@@ -612,10 +622,10 @@ static jboolean registerNativeMethods(JNIEnv *env) {
         return JNI_FALSE;
     }
     if ((*env)->RegisterNatives(env, clazz, methods, NELEM(methods)) < 0) {
-        (*env)->DeleteLocalRef(env,clazz);
+        (*env)->DeleteLocalRef(env, clazz);
         return JNI_FALSE;
     }
-    (*env)->DeleteLocalRef(env,clazz);
+    (*env)->DeleteLocalRef(env, clazz);
 
     return JNI_TRUE;
 }

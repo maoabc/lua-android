@@ -8,7 +8,6 @@ class LuaJNI {
     public static final int LUA_REGISTRYINDEX = placeholder();
 
 
-
     static {
         System.loadLibrary("jlua");
     }
@@ -108,7 +107,7 @@ class LuaJNI {
 
     static native boolean next0(long ptr, int idx);
 
-    static native void insert0(long ptr,int idx);
+    static native void insert0(long ptr, int idx);
 
 
     //lauxlib.h
@@ -128,5 +127,7 @@ class LuaJNI {
     static native int ref0(long ptr, int t);
 
     static native void unref0(long ptr, int t, int ref);
+
+//    static native void error0(long ptr, String msg);
 
 }
