@@ -22,18 +22,24 @@ public class ReflectionObject {
 
             final Class<?> cls = obj.getClass();
             if (cls.isArray()) {//数组相关
-                int idx = luaState.checkInt(-1);
-                if (idx < 0) {
-                    final int length = Array.getLength(obj);
-                    idx = length - idx;
-                } else if (idx > 0) {
-                    idx--;
-                } else {
-                    throw new LuaException("array index out");
+                if ("length".equals(luaState.optString(-1, null))) {
+                    luaState.pushInt32(Array.getLength(obj));
+                    return 1;
                 }
-                final Object v = Array.get(obj, idx);
-                pushJavaValue(luaState, v);
-                return 1;
+                if (luaState.isInteger(-1)) {
+                    int idx = luaState.checkInt(-1);
+                    if (idx < 0) {
+                        final int length = Array.getLength(obj);
+                        idx = length - idx;
+                    } else if (idx > 0) {
+                        idx--;
+                    } else {
+                        throw new LuaException("array index out");
+                    }
+                    final Object v = Array.get(obj, idx);
+                    pushJavaValue(luaState, v);
+                    return 1;
+                }
             }
 
             final String name = luaState.checkString(-1);

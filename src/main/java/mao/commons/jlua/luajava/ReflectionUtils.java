@@ -86,14 +86,6 @@ public class ReflectionUtils {
                 outArgs[parameterIdx] = l.toBoolean(idx);
                 return true;
             }
-            if (parameterType == Character.TYPE && luaType == LuaState.LUA_TSTRING) {//lua长度为1的字符串可以当成java的char
-                final String s = l.toLString(idx);
-                if (s.length() == 1) {
-                    outArgs[parameterIdx] = (char) s.charAt(0);
-                    return true;
-                }
-                return false;
-            }
             if (luaType == LuaState.LUA_TNUMBER) {
                 if (parameterType == Byte.TYPE) {
                     outArgs[parameterIdx] = (byte) l.toInt64(idx);
