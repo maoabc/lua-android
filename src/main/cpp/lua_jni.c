@@ -138,7 +138,7 @@ Java_mao_commons_jlua_LuaJNI_pushString0(JNIEnv *env, jclass clazz, jlong ptr, j
     char buf[128];
     lua_State *l = jlong_to_ptr(ptr);
     if (str == NULL) {
-        throw_LuaException(env, "str is null");
+        lua_pushnil(l);
         return;
     }
     const jsize utf_len = (*env)->GetStringUTFLength(env, str);
@@ -156,6 +156,27 @@ Java_mao_commons_jlua_LuaJNI_pushString0(JNIEnv *env, jclass clazz, jlong ptr, j
     if (string != buf) {
         (*env)->ReleaseStringUTFChars(env, str, string);
     }
+}
+
+static void
+Java_mao_commons_jlua_LuaJNI_pushBytes0(JNIEnv *env, jclass clazz, jlong ptr, jbyteArray bytes) {
+    lua_State *l = jlong_to_ptr(ptr);
+    if (bytes == NULL) {
+        lua_pushnil(l);
+        return;
+    }
+    jsize length = (*env)->GetArrayLength(env, bytes);
+    jbyte *string = (*env)->GetByteArrayElements(env, bytes, NULL);
+
+    lua_pushlstring(l, (const char *) string, length);
+
+    (*env)->ReleaseByteArrayElements(env, bytes, string, JNI_ABORT);
+}
+
+static void
+Java_mao_commons_jlua_LuaJNI_pushValue0(JNIEnv *env, jclass clazz, jlong ptr, jint idx) {
+    lua_State *l = jlong_to_ptr(ptr);
+    lua_pushvalue(l, idx);
 }
 
 static jboolean
@@ -543,6 +564,10 @@ static const JNINativeMethod methods[] = {
         {"checkJavaObject0", "(JI)Ljava/lang/Object;",                     (void *) Java_mao_commons_jlua_LuaJNI_checkJavaObject0},
 
         {"pushString0",      "(JLjava/lang/String;)V",                     (void *) Java_mao_commons_jlua_LuaJNI_pushString0},
+
+        {"pushBytes0",       "(J[B)V",                                     (void *) Java_mao_commons_jlua_LuaJNI_pushBytes0},
+
+        {"pushValue0",       "(JI)V",                                      (void *) Java_mao_commons_jlua_LuaJNI_pushValue0},
 
         {"isString0",        "(JI)Z",                                      (void *) Java_mao_commons_jlua_LuaJNI_isString0},
 

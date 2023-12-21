@@ -11,7 +11,7 @@ import androidx.annotation.Size;
  */
 public class LuaCallbackContext {
     //对应到c的结构体callback_context
-    private int contextRef;
+    private int contextRef = LuaState.LUA_NOREF;
     public final LuaState l;
 
     public LuaCallbackContext(LuaState l) {
@@ -39,6 +39,10 @@ public class LuaCallbackContext {
 
     @Override
     protected void finalize() throws Throwable {
+        release();
+    }
+
+    public final void release() {
         synchronized (this) {
             if (contextRef != LuaState.LUA_NOREF) {
                 l.unref(LuaJNI.LUA_REGISTRYINDEX, contextRef);

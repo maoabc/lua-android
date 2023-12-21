@@ -55,6 +55,11 @@ class LuaJNI {
 
     static native void pushString0(long ptr, String str);
 
+    //lua_pushlstring
+    static native void pushBytes0(long ptr, byte[] bytes);
+
+    static native void pushValue0(long ptr, int idx);
+
     static native boolean isString0(long ptr, int idx);
 
     static native String toLString0(long ptr, int idx);

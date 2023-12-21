@@ -164,6 +164,14 @@ public class LuaState implements Closeable {
         LuaJNI.pushString0(ptr, str);
     }
 
+    public void pushBytes(@NonNull byte[] bytes) {
+        LuaJNI.pushBytes0(ptr, bytes);
+    }
+
+    public void pushValue(int idx) {
+        LuaJNI.pushValue0(ptr, idx);
+    }
+
     public boolean isString(int idx) {
         return LuaJNI.isString0(ptr, idx);
     }
