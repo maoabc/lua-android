@@ -36,6 +36,8 @@ public class LuaState implements Closeable {
     public static final int LUA_NOREF = (-2);
     public static final int LUA_REFNIL = (-1);
 
+    public static final int LUAI_MAXSTACK = LuaJNI.LUAI_MAXSTACK;
+    public static final int LUA_REGISTRYINDEX = LuaJNI.LUA_REGISTRYINDEX;
 
     long ptr;
 
@@ -196,6 +198,10 @@ public class LuaState implements Closeable {
         return LuaJNI.checkLString0(ptr, arg);
     }
 
+    public double checkNumber(int arg) {
+        return LuaJNI.checkNumber0(ptr, arg);
+    }
+
     public String optString(int idx, String def) {
         if (type(idx) <= 0) {
             return def;
@@ -284,6 +290,12 @@ public class LuaState implements Closeable {
         }
     }
 
+    public void loadBytes(@NonNull byte[] buf, String name) {
+        if (LuaJNI.loadBufferx0(ptr, buf, name, null) != LUA_OK) {
+            throw new LuaException(checkString(-1));
+        }
+    }
+
     public void setGlobal(String global) {
         LuaJNI.setGlobal0(ptr, global);
     }
@@ -314,6 +326,10 @@ public class LuaState implements Closeable {
 
     public void rawSetI(int idx, int n) {
         LuaJNI.rawSetI0(ptr, idx, n);
+    }
+
+    public boolean rawEqual(int idx1, int idx2) {
+        return LuaJNI.rawEqual0(ptr, idx1, idx2);
     }
 
     public void newTable() {

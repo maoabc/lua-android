@@ -4,17 +4,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 class LuaJNI {
-    public static final int LUAI_MAXSTACK = placeholder();
-    public static final int LUA_REGISTRYINDEX = placeholder();
+    public static final int LUAI_MAXSTACK = 1000000;
+    public static final int LUA_REGISTRYINDEX = -LUAI_MAXSTACK - 1000;
 
 
     static {
         System.loadLibrary("jlua");
-    }
-
-    // A hack to avoid these constants being inlined by javac...
-    private static int placeholder() {
-        return 0;
     }
 
 
@@ -77,6 +72,8 @@ class LuaJNI {
 
     static native int rawget0(long ptr, int idx);
 
+    static native boolean rawEqual0(long ptr, int idx1, int idx2);
+
     static native int getMetatable0(long ptr, int idx);
 
 
@@ -123,6 +120,8 @@ class LuaJNI {
     static native void openLibs0(long ptr);
 
     static native long checkInteger0(long ptr, int arg);
+
+    static native double checkNumber0(long ptr, int arg);
 
     static native String checkLString0(long ptr, int arg);
 
