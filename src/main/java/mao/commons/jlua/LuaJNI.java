@@ -59,6 +59,8 @@ class LuaJNI {
 
     static native String toLString0(long ptr, int idx);
 
+    static native byte[] toRawString0(long ptr, int idx);
+
     static native void setTop0(long ptr, int idx);
 
     static native int getTop0(long ptr);

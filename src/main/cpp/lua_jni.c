@@ -195,6 +195,20 @@ Java_mao_commons_jlua_LuaJNI_toLString0(JNIEnv *env, jclass clazz, jlong ptr, ji
     return (*env)->NewStringUTF(env, string);
 }
 
+static jbyteArray
+Java_mao_commons_jlua_LuaJNI_toRawString0(JNIEnv *env, jclass clazz, jlong ptr, jint idx) {
+    lua_State *l = jlong_to_ptr(ptr);
+    size_t len = -1;
+    const char *string = lua_tolstring(l, idx, &len);
+    if (string == NULL || len < 0) {
+        return NULL;
+    }
+    jbyteArray ba = (*env)->NewByteArray(env, len);
+    (*env)->SetByteArrayRegion(env, ba, 0, len, (const jbyte *) string);
+
+    return ba;
+}
+
 static void
 Java_mao_commons_jlua_LuaJNI_setTop0(JNIEnv *env, jclass clazz, jlong ptr, jint idx) {
     lua_State *l = jlong_to_ptr(ptr);
@@ -590,6 +604,8 @@ static const JNINativeMethod methods[] = {
         {"isString0",        "(JI)Z",                                      (void *) Java_mao_commons_jlua_LuaJNI_isString0},
 
         {"toLString0",       "(JI)Ljava/lang/String;",                     (void *) Java_mao_commons_jlua_LuaJNI_toLString0},
+
+        {"toRawString0",     "(JI)[B",                                     (void *) Java_mao_commons_jlua_LuaJNI_toRawString0},
 
         {"setTop0",          "(JI)V",                                      (void *) Java_mao_commons_jlua_LuaJNI_setTop0},
 
