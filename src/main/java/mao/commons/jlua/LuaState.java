@@ -348,6 +348,10 @@ public class LuaState implements Closeable {
         return LuaJNI.toRawString0(ptr, idx);
     }
 
+    public void forceExit() {
+        LuaJNI.exit0(ptr);
+    }
+
     @Override
     public void close() {
     }

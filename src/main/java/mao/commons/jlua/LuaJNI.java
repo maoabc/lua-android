@@ -136,4 +136,6 @@ class LuaJNI {
 
 //    static native void error0(long ptr, String msg);
 
+    static native void exit0(long ptr);
+
 }

@@ -16,4 +16,8 @@ add_library(jlua SHARED
 
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fvisibility=hidden")
 
+
 target_link_libraries(jlua log lua_static ffi_static)
+
+#add_library(mythread SHARED pthread_jni.c)
+#target_link_libraries(mythread log)

@@ -550,6 +550,16 @@ Java_mao_commons_jlua_LuaJNI_unref0(JNIEnv *env, jclass clazz, jlong ptr, jint t
     luaL_unref(l, t, ref);
 }
 
+static void lua_exit(lua_State *L, lua_Debug *ar) {
+    luaL_error(L, "force exit lua");
+}
+
+static void
+Java_mao_commons_jlua_LuaJNI_exit0(JNIEnv *env, jclass clazz, jlong ptr) {
+    lua_State *l = jlong_to_ptr(ptr);
+    lua_sethook(l, lua_exit, LUA_MASKCOUNT, 1);
+}
+
 //static void
 //Java_mao_commons_jlua_LuaJNI_error0(JNIEnv *env, jclass clazz, jlong ptr, jstring errorMsg) {
 //    lua_State *l = jlong_to_ptr(ptr);
@@ -673,6 +683,8 @@ static const JNINativeMethod methods[] = {
         {"ref0",             "(JI)I",                                      (void *) Java_mao_commons_jlua_LuaJNI_ref0},
 
         {"unref0",           "(JII)V",                                     (void *) Java_mao_commons_jlua_LuaJNI_unref0},
+
+        {"exit0",            "(J)V",                                       (void *) Java_mao_commons_jlua_LuaJNI_exit0},
 
 //        {"error0",           "(JLjava/lang/String;)V",                     (void *) Java_mao_commons_jlua_LuaJNI_error0},
 
