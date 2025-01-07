@@ -19,7 +19,7 @@ set(LIB_FFI_SRCS
 set(INCLUDE_DIRS libffi/include ${out})
 
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall   -Werror \
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall   -Werror,-Wunused-but-set-variable \
         -Wno-error=incompatible-pointer-types \
         -Wno-error=unused-label \
         -Wno-incompatible-pointer-types \
@@ -30,7 +30,9 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall   -Werror \
         -Wno-pointer-arith \
         -Wno-sign-compare \
         -Wno-unused-parameter \
-        -Wno-unused-result")
+        -Wno-unused-result \
+        "
+        )
 
 set(HAVE_LONG_DOUBLE 0)
 set(FFI_EXEC_TRAMPOLINE_TABLE 0)
