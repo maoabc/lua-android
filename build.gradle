@@ -31,10 +31,6 @@ android {
             version "${versions.cmake}"
         }
     }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
     ndkVersion = "${versions.ndk}"
     namespace 'com.nmmedit.lua'
 }
