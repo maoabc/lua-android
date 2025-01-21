@@ -198,9 +198,9 @@ Java_mao_commons_jlua_LuaJNI_toLString0(JNIEnv *env, jclass clazz, jlong ptr, ji
 static jbyteArray
 Java_mao_commons_jlua_LuaJNI_toRawString0(JNIEnv *env, jclass clazz, jlong ptr, jint idx) {
     lua_State *l = jlong_to_ptr(ptr);
-    size_t len = -1;
+    size_t len = 0;
     const char *string = lua_tolstring(l, idx, &len);
-    if (string == NULL || len < 0) {
+    if (string == NULL) {
         return NULL;
     }
     jbyteArray ba = (*env)->NewByteArray(env, len);
@@ -559,6 +559,7 @@ Java_mao_commons_jlua_LuaJNI_exit0(JNIEnv *env, jclass clazz, jlong ptr) {
     lua_State *l = jlong_to_ptr(ptr);
     lua_sethook(l, lua_exit, LUA_MASKCOUNT, 1);
 }
+
 
 //static void
 //Java_mao_commons_jlua_LuaJNI_error0(JNIEnv *env, jclass clazz, jlong ptr, jstring errorMsg) {

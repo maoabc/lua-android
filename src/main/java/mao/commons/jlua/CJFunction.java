@@ -1,5 +1,7 @@
 package mao.commons.jlua;
 
+import dalvik.annotation.optimization.FastNative;
+
 /**
  * java层接口传递到native,通过ffi生成c闭包
  * 对应结构体:
@@ -46,8 +48,10 @@ public abstract class CJFunction implements JFunction {
 
     private static native long createClosure0(JFunction function);
 
+    @FastNative
     private static native long getCFunction0(long ptr);
 
+    @FastNative
     private static native JFunction getJFunction0(long ptr);
 
     private static native void freeClosure0(long ptr);
