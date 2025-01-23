@@ -65,9 +65,11 @@ class LuaJNI {
     @FastNative
     static native Object checkJavaObject0(long ptr, int arg);
 
+    @FastNative
     static native void pushString0(long ptr, String str);
 
     //lua_pushlstring
+    @FastNative
     static native void pushBytes0(long ptr, byte[] bytes);
 
     @FastNative
@@ -76,8 +78,10 @@ class LuaJNI {
     @FastNative
     static native boolean isString0(long ptr, int idx);
 
+    @FastNative
     static native String toLString0(long ptr, int idx);
 
+    @FastNative
     static native byte[] toRawString0(long ptr, int idx);
 
     @FastNative
@@ -169,6 +173,7 @@ class LuaJNI {
     @FastNative
     static native double checkNumber0(long ptr, int arg);
 
+    @FastNative
     static native String checkLString0(long ptr, int arg);
 
 
