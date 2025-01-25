@@ -10,8 +10,8 @@
     public static final <fields>;
 }
 
--keepclassmembers class mao.commons.jlua.JFunction {
-    *;
+-keepclassmembers class mao.commons.jlua.CJFunction {
+    call(long);
 }
 -keepclassmembers class mao.commons.jlua.ResourceFinder {
     *;

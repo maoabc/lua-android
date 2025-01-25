@@ -13,7 +13,7 @@ import dalvik.annotation.optimization.FastNative;
  * <p>
  * }
  */
-public abstract class CJFunction implements JFunction {
+public abstract class CJFunction {
     //native层结构体指针
     private long ptr;
 
@@ -21,7 +21,7 @@ public abstract class CJFunction implements JFunction {
         this.ptr = createClosure0(this);
     }
 
-    @Override
+    //被native层调用
     public final int call(long luaState) throws Throwable {
         return call(LuaState.wrap(luaState));
     }
@@ -37,22 +37,22 @@ public abstract class CJFunction implements JFunction {
     }
 
     long getCFunction() {
+        if (ptr == 0) {
+            return UtilFunctions.emptyFunc();
+        }
         return getCFunction0(ptr);
     }
 
     protected abstract int call(LuaState luaState) throws Throwable;
 
 
-
-
-
-    private static native long createClosure0(JFunction function);
+    private static native long createClosure0(CJFunction function);
 
     @FastNative
     private static native long getCFunction0(long ptr);
 
     @FastNative
-    private static native JFunction getJFunction0(long ptr);
+    private static native CJFunction getJFunction0(long ptr);
 
     private static native void freeClosure0(long ptr);
 }

@@ -9,4 +9,7 @@ public class UtilFunctions {
 
     @FastNative
     public static native long traceback();
+
+    @FastNative
+    public static native long emptyFunc();
 }

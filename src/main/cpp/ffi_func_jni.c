@@ -9,6 +9,7 @@
 #include "lauxlib.h"
 #include "ffi.h"
 
+static jclass cj_func_cls;
 
 #define CHECK_JAVA_EXCEPTION(_env, _L)                                               \
 {                                                                                    \
@@ -43,7 +44,8 @@ static void callback(ffi_cif *cif,
         return;
     }
 
-    *(int *) ret = (*env)->CallIntMethod(env, userdata, funcCallMethodId, ptr_to_jlong(l));
+    *(int *) ret = (*env)->CallNonvirtualIntMethod(env, userdata, cj_func_cls, funcCallMethodId,
+                                                   ptr_to_jlong(l));
 
     //检测异常
     CHECK_JAVA_EXCEPTION(env, l);
@@ -112,13 +114,13 @@ Java_mao_commons_jlua_CJFunction_freeClosure0(JNIEnv *env, jclass clazz, jlong p
 
 
 static const JNINativeMethod methods[] = {
-        {"createClosure0", "(Lmao/commons/jlua/JFunction;)J", (void *) Java_mao_commons_jlua_CJFunction_createClosure0},
+        {"createClosure0", "(Lmao/commons/jlua/CJFunction;)J", (void *) Java_mao_commons_jlua_CJFunction_createClosure0},
 
-        {"getCFunction0",  "(J)J",                            (void *) Java_mao_commons_jlua_CJFunction_getCFunction0},
+        {"getCFunction0",  "(J)J",                             (void *) Java_mao_commons_jlua_CJFunction_getCFunction0},
 
-        {"getJFunction0",  "(J)Lmao/commons/jlua/JFunction;", (void *) Java_mao_commons_jlua_CJFunction_getJFunction0},
+        {"getJFunction0",  "(J)Lmao/commons/jlua/CJFunction;", (void *) Java_mao_commons_jlua_CJFunction_getJFunction0},
 
-        {"freeClosure0",   "(J)V",                            (void *) Java_mao_commons_jlua_CJFunction_freeClosure0},
+        {"freeClosure0",   "(J)V",                             (void *) Java_mao_commons_jlua_CJFunction_freeClosure0},
 
 };
 
@@ -132,6 +134,7 @@ jboolean register_ffi_function(JNIEnv *env) {
         (*env)->DeleteLocalRef(env, clazz);
         return JNI_FALSE;
     }
+    cj_func_cls = (*env)->NewGlobalRef(env, clazz);
     (*env)->DeleteLocalRef(env, clazz);
 
     return JNI_TRUE;

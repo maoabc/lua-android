@@ -44,6 +44,14 @@ public class LuaStateTest {
         state.getMetatable(-1);
 
         final CJFunction indexFunc = new CJFunction() {
+
+            final CJFunction tostring = new CJFunction() {
+                @Override
+                protected int call(LuaState luaState) {
+                    luaState.pushString("xxx");
+                    return 1;
+                }
+            };
             @Override
             protected int call(LuaState luaState) {
                 final boolean javaObject = luaState.isJavaObject(-2);
@@ -51,13 +59,6 @@ public class LuaStateTest {
                 final boolean string = luaState.isString(-1);
                 final String methodName = luaState.toLString(-1);
                 if ("toString".equals(methodName)) {
-                    final CJFunction tostring = new CJFunction() {
-                        @Override
-                        protected int call(LuaState luaState) {
-                            luaState.pushString("xxx");
-                            return 1;
-                        }
-                    };
                     luaState.pushClosure(tostring, 1);
                 }
                 return 1;

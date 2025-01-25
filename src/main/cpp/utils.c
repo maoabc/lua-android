@@ -52,7 +52,7 @@ void init_ids(JNIEnv *env) {
                                                                     "mao/commons/jlua/LuaException"));
 
 
-    jclass funcCls = (*env)->FindClass(env, "mao/commons/jlua/JFunction");
+    jclass funcCls = (*env)->FindClass(env, "mao/commons/jlua/CJFunction");
     funcCallMethodId = (*env)->GetMethodID(env, funcCls, "call", "(J)I");
     (*env)->DeleteLocalRef(env, funcCls);
 

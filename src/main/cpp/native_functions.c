@@ -16,10 +16,18 @@ static int traceback(lua_State *L) {
     return 1;
 }
 
+static int empty_func(lua_State *L) {
+    return 0;
+}
 
 static jlong
 Java_mao_commons_jlua_UtilFunctions_traceback(JNIEnv *env, jclass clazz) {
     return ptr_to_jlong(traceback);
+}
+
+static jlong
+Java_mao_commons_jlua_UtilFunctions_emptyFunc(JNIEnv *env, jclass clazz) {
+    return ptr_to_jlong(empty_func);
 }
 
 
@@ -27,6 +35,8 @@ Java_mao_commons_jlua_UtilFunctions_traceback(JNIEnv *env, jclass clazz) {
 
 static const JNINativeMethod methods[] = {
         {"traceback", "()J", (void *) Java_mao_commons_jlua_UtilFunctions_traceback},
+
+        {"emptyFunc", "()J", (void *) Java_mao_commons_jlua_UtilFunctions_emptyFunc},
 
 };
 
