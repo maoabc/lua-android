@@ -16,6 +16,12 @@ add_library(jlua SHARED
 
 set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fvisibility=hidden")
 
+add_definitions(
+        -flto
+)
+add_link_options("-Wl,--pack-dyn-relocs=android")
+
+
 
 target_link_libraries(jlua log lua_static ffi_static)
 
