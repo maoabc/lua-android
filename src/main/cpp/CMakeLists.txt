@@ -18,12 +18,15 @@ set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -fvisibility=hidden")
 
 add_definitions(
         -flto
+        -O3
 )
 add_link_options("-Wl,--pack-dyn-relocs=android")
 
 
 
 target_link_libraries(jlua log lua_static ffi_static)
+
+target_link_options(jlua PUBLIC -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/link.map)
 
 #add_library(mythread SHARED pthread_jni.c)
 #target_link_libraries(mythread log)
