@@ -198,6 +198,10 @@ public class LuaState implements Closeable {
         return LuaJNI.checkLString0(ptr, arg);
     }
 
+    public byte[] checkBytes(int arg) {
+        return LuaJNI.checkLuaBytes0(ptr, arg);
+    }
+
     public double checkNumber(int arg) {
         return LuaJNI.checkNumber0(ptr, arg);
     }
@@ -320,8 +324,8 @@ public class LuaState implements Closeable {
         LuaJNI.setField0(ptr, idx, key);
     }
 
-    public int rawGetI(int idx, int n) {
-        return LuaJNI.rawGetI0(ptr, idx, n);
+    public void rawGetI(int idx, int n) {
+        LuaJNI.rawGetI0(ptr, idx, n);
     }
 
     public void rawSetI(int idx, int n) {

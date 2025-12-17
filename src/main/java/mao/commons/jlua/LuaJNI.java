@@ -1,5 +1,7 @@
 package mao.commons.jlua;
 
+import android.os.Build;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -175,6 +177,9 @@ class LuaJNI {
 
     @FastNative
     static native String checkLString0(long ptr, int arg);
+
+    @FastNative
+    static native byte[] checkLuaBytes0(long ptr, int arg);
 
 
     @FastNative

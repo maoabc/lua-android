@@ -529,6 +529,22 @@ Java_mao_commons_jlua_LuaJNI_checkLString0(JNIEnv *env, jclass clazz, jlong ptr,
     return (*env)->NewStringUTF(env, s);
 }
 
+static jbyteArray
+Java_mao_commons_jlua_LuaJNI_checkLuaBytes0(JNIEnv *env, jclass clazz, jlong ptr, jint arg) {
+    lua_State *l = jlong_to_ptr(ptr);
+
+    size_t len;
+
+    const char *s = lua_tolstring(l, arg, &len);
+    if (!s) {
+        throw_LuaException(env, "no string");
+        return NULL;
+    }
+    jbyteArray bArr = (*env)->NewByteArray(env, len);
+    (*env)->SetByteArrayRegion(env, bArr, 0, len, (const jbyte *) s);
+    return bArr;
+}
+
 
 static void
 Java_mao_commons_jlua_LuaJNI_checkType0(JNIEnv *env, jclass clazz, jlong ptr, jint arg, jint t) {
@@ -678,6 +694,8 @@ static const JNINativeMethod methods[] = {
         {"checkNumber0",     "(JI)D",                                      (void *) Java_mao_commons_jlua_LuaJNI_checkNumber0},
 
         {"checkLString0",    "(JI)Ljava/lang/String;",                     (void *) Java_mao_commons_jlua_LuaJNI_checkLString0},
+
+        {"checkLuaBytes0",   "(JI)[B",                                     (void *) Java_mao_commons_jlua_LuaJNI_checkLuaBytes0},
 
         {"checkType0",       "(JII)V",                                     (void *) Java_mao_commons_jlua_LuaJNI_checkType0},
 
