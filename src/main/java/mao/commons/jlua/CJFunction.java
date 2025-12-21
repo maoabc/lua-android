@@ -27,7 +27,7 @@ public abstract class CJFunction {
     }
 
     @Override
-    protected void finalize() throws Throwable {
+    protected final void finalize() throws Throwable {
         synchronized (this) {
             if (ptr != 0) {
                 freeClosure0(ptr);
@@ -36,7 +36,7 @@ public abstract class CJFunction {
         }
     }
 
-    long getCFunction() {
+    final long getCFunction() {
         if (ptr == 0) {
             return UtilFunctions.emptyFunc();
         }

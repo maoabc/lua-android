@@ -13,12 +13,12 @@ public class LuaJavaLibTest {
     @Test
     public void testLib() throws InterruptedException {
         final LuaState luaState = LuaState.create();
-        new LuaJavaLib(luaState);
+        LuaJavaLib.register(luaState);
         luaState.loadBuffer("local cls=luajava.bindClass(\"java.lang.String\")\n" +
                 "b=cls.getClass\n" +
-                "我=luajava.new(cls,\"dsdlkjdslkj\")\n"+
+                "我=luajava.new(cls,\"dsdlkjdslkj\")\n" +
 //                "b()\n"+
-                "ff=cls:format(\"hello %s %s\",cls,\"ddd\")\n"+
+                "ff=cls:format(\"hello %s %s\",cls,\"ddd\")\n" +
                 "return 我");
         final int[] ints = new int[3];
         final Object[] objects = new Object[3];
@@ -30,7 +30,7 @@ public class LuaJavaLibTest {
                 return 0;
             }
         };
-        luaState.pcall(0, 1,0);
+        luaState.pcall(0, 1, 0);
         final Object s = luaState.toJavaObject(-1);
         luaState.pushString("dddd");
         luaState.setGlobal("我");

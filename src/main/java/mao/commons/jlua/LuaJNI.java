@@ -65,9 +65,6 @@ class LuaJNI {
     static native Object toJavaObject0(long ptr, int idx);
 
     @FastNative
-    static native Object checkJavaObject0(long ptr, int arg);
-
-    @FastNative
     static native void pushString0(long ptr, String str);
 
     //lua_pushlstring
@@ -168,22 +165,6 @@ class LuaJNI {
                                    @Nullable String mode);
 
     static native void openLibs0(long ptr);
-
-    @FastNative
-    static native long checkInteger0(long ptr, int arg);
-
-    @FastNative
-    static native double checkNumber0(long ptr, int arg);
-
-    @FastNative
-    static native String checkLString0(long ptr, int arg);
-
-    @FastNative
-    static native byte[] checkLuaBytes0(long ptr, int arg);
-
-
-    @FastNative
-    static native void checkType0(long ptr, int arg, int t);
 
     @FastNative
     static native int ref0(long ptr, int t);

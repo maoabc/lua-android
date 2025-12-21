@@ -135,19 +135,26 @@ public class LuaJavaLib {
     };
 
 
-    public LuaJavaLib(LuaState l) {
-        l.pushJavaObject(this);
+    private LuaJavaLib() {
+    }
+
+    public static void register(LuaState l){
+        final LuaJavaLib luaJavaLib = new LuaJavaLib();
+
+        l.pushJavaObject(luaJavaLib);
         l.setGlobal("luajava");
+
         //得到对象
         l.getGlobal("luajava");
 
         l.getMetatable(-1);
 
         l.pushString("__index");
-        l.pushFunction(metaIndexFunction);
+        l.pushFunction(luaJavaLib.metaIndexFunction);
         l.setTable(-3);
 
         l.pop(2);
+
 
     }
 }

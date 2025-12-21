@@ -12,6 +12,8 @@ extern void init_ids(JNIEnv *env);
 
 extern void register_luaJNI(JNIEnv *env);
 
+extern void register_fast_luaJNI(JNIEnv *env);
+
 extern void register_lua_android(JNIEnv *env);
 
 extern jboolean register_callback_context(JNIEnv *env);
@@ -31,6 +33,8 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     init_ids(env);
 
     register_luaJNI(env);
+
+    register_fast_luaJNI(env);
 
     register_lua_android(env);
 

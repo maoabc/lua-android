@@ -46,7 +46,7 @@ public class LuaCallbackContextTest {
     @Test
     public void testCreateProxy() {
         final LuaState luaState = LuaState.create();
-        new LuaJavaLib(luaState);
+        LuaJavaLib.register(luaState);
         luaState.pushCFunction(UtilFunctions.traceback());
 
         luaState.loadBuffer("" +

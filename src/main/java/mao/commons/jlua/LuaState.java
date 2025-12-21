@@ -6,6 +6,9 @@ import java.io.Closeable;
 
 public class LuaState implements Closeable {
 
+    //用于判断是否使用优化的native方法
+    private static final boolean useCriticalNative = android.os.Build.VERSION.SDK_INT >= 29;  // API 29 = Android 10
+
 
     public static final int LUA_OK = 0;
     public static final int LUA_YIELD = 1;
@@ -41,19 +44,28 @@ public class LuaState implements Closeable {
 
     long ptr;
 
+
     protected LuaState(long ptr) {
         this.ptr = ptr;
     }
 
     public static LuaState create() {
-        final FinalizeLuaState finalizeLuaState = new FinalizeLuaState();
-        finalizeLuaState.openLibs();
-        return finalizeLuaState;
+        final LuaState luaState;
+        if (useCriticalNative) {
+            luaState = new FinalizeFastLuaState();
+        } else {
+            luaState = new FinalizeLuaState();
+        }
+        luaState.openLibs();
+        return luaState;
     }
 
     static LuaState wrap(long ptr) {
         if (ptr == 0) {
             throw new IllegalArgumentException("ptr is null");
+        }
+        if (useCriticalNative) {
+            return new FastLuaState(ptr);
         }
         return new LuaState(ptr);
     }
@@ -63,11 +75,17 @@ public class LuaState implements Closeable {
     }
 
     public int checkInt(int arg) {
-        return (int) LuaJNI.checkInteger0(ptr, arg);
+        if (!isInteger(arg)) {
+            throw new LuaException("Not a integer");
+        }
+        return toInt32(arg);
     }
 
     public long checkInt64(int arg) {
-        return LuaJNI.checkInteger0(ptr, arg);
+        if (!isInteger(arg)) {
+            throw new LuaException("Not a integer");
+        }
+        return toInt64(arg);
     }
 
     public void pushClosure(CJFunction function, int n) {
@@ -159,7 +177,10 @@ public class LuaState implements Closeable {
     }
 
     public Object checkJavaObject(int idx) {
-        return LuaJNI.checkJavaObject0(ptr, idx);
+        if (!isJavaObject(idx)) {
+            throw new LuaException("Not a java object");
+        }
+        return LuaJNI.toJavaObject0(ptr, idx);
     }
 
     public void pushString(@NonNull String str) {
@@ -195,15 +216,24 @@ public class LuaState implements Closeable {
     }
 
     public String checkString(int arg) {
-        return LuaJNI.checkLString0(ptr, arg);
+        if (!isString(arg)) {
+            throw new LuaException("Not a string");
+        }
+        return toLString(arg);
     }
 
-    public byte[] checkBytes(int arg) {
-        return LuaJNI.checkLuaBytes0(ptr, arg);
+    public byte[] checkRawString(int arg) {
+        if (!isString(arg)) {
+            throw new LuaException("Not a string");
+        }
+        return toRawString(arg);
     }
 
     public double checkNumber(int arg) {
-        return LuaJNI.checkNumber0(ptr, arg);
+        if (type(arg) != LUA_TNUMBER) {
+            throw new LuaException("Not a number");
+        }
+        return toNumber(arg);
     }
 
     public String optString(int idx, String def) {
@@ -241,7 +271,7 @@ public class LuaState implements Closeable {
     }
 
     public boolean isNil(int idx) {
-        return LuaJNI.type0(ptr, idx) == LUA_TNIL;
+        return type(idx) == LUA_TNIL;
     }
 
     public String toLString(int idx) {
@@ -340,10 +370,6 @@ public class LuaState implements Closeable {
         LuaJNI.createTable0(ptr, 0, 0);
     }
 
-    public void checkType(int arg, int t) {
-        LuaJNI.checkType0(ptr, arg, t);
-    }
-
     public boolean next(int idx) {
         return LuaJNI.next0(ptr, idx);
     }
@@ -390,6 +416,152 @@ public class LuaState implements Closeable {
             close();
         }
     }
+
+    private static class FastLuaState extends LuaState {
+
+        protected FastLuaState(long ptr) {
+            super(ptr);
+        }
+
+        @Override
+        public final void pushClosure(CJFunction function, int n) {
+            FastLuaJNI.pushClosure0(ptr, function.getCFunction(), n);
+        }
+
+        @Override
+        public final void pushFunction(CJFunction function) {
+            FastLuaJNI.pushClosure0(ptr, function.getCFunction(), 0);
+        }
+
+
+        @Override
+        public final void pushCFunction(long funcPtr) {
+            FastLuaJNI.pushClosure0(ptr, funcPtr, 0);
+        }
+
+        @Override
+        public final void pushCClosure(long funcPtr, int n) {
+            FastLuaJNI.pushClosure0(ptr, funcPtr, n);
+        }
+
+        @Override
+        public final void remove(int idx) {
+            FastLuaJNI.remove0(ptr, idx);
+        }
+
+        @Override
+        public final void insert(int idx) {
+            FastLuaJNI.insert0(ptr, idx);
+        }
+
+        @Override
+        public final void pushInt32(int i) {
+            FastLuaJNI.pushInteger0(ptr, i);
+        }
+
+        @Override
+        public final void pushInt64(long i) {
+            FastLuaJNI.pushInteger0(ptr, i);
+        }
+
+        @Override
+        public final int toInt32(int idx) {
+            return (int) FastLuaJNI.toInteger0(ptr, idx);
+        }
+
+        @Override
+        public final long toInt64(int idx) {
+            return FastLuaJNI.toInteger0(ptr, idx);
+        }
+
+        @Override
+        public final boolean isInteger(int idx) {
+            return FastLuaJNI.isInteger0(ptr, idx);
+        }
+
+        @Override
+        public final void pushBoolean(boolean b) {
+            FastLuaJNI.pushBoolean0(ptr, b);
+        }
+
+        @Override
+        public final boolean toBoolean(int idx) {
+            return FastLuaJNI.toBoolean0(ptr, idx);
+        }
+
+        @Override
+        public final void pushNumber(double num) {
+            FastLuaJNI.pushNumber0(ptr, num);
+        }
+
+        @Override
+        public final double toNumber(int idx) {
+            return FastLuaJNI.toNumber0(ptr, idx);
+        }
+
+        @Override
+        public final void pushValue(int idx) {
+            FastLuaJNI.pushValue0(ptr, idx);
+        }
+
+        @Override
+        public final boolean isString(int idx) {
+            return FastLuaJNI.isString0(ptr, idx);
+        }
+
+        @Override
+        public final boolean isFunction(int idx) {
+            return FastLuaJNI.type0(ptr, idx) == LUA_TFUNCTION;
+        }
+
+        @Override
+        public final boolean isTable(int idx) {
+            return FastLuaJNI.type0(ptr, idx) == LUA_TTABLE;
+        }
+
+        @Override
+        public final int type(int idx) {
+            return FastLuaJNI.type0(ptr, idx);
+        }
+
+        @Override
+        public final void pushNil() {
+            FastLuaJNI.pushNil0(ptr);
+        }
+
+        @Override
+        public final void setTop(int idx) {
+            FastLuaJNI.setTop0(ptr, idx);
+        }
+
+        @Override
+        public final int getTop() {
+            return FastLuaJNI.getTop0(ptr);
+        }
+    }
+
+    private static final class FinalizeFastLuaState extends FastLuaState {
+
+        FinalizeFastLuaState() {
+            super(LuaJNI.newState0());
+        }
+
+        @Override
+        public void close() {
+            synchronized (this) {
+                if (ptr != 0) {
+                    LuaJNI.close0(ptr);
+                    ptr = 0;
+                }
+            }
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            close();
+        }
+    }
+
 
     public interface TableIterator {
         void iter(LuaState l);

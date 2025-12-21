@@ -260,16 +260,6 @@ Java_mao_commons_jlua_LuaJNI_toJavaObject0(JNIEnv *env, jclass clazz, jlong ptr,
     return *object;
 }
 
-static jobject
-Java_mao_commons_jlua_LuaJNI_checkJavaObject0(JNIEnv *env, jclass clazz, jlong ptr, jint arg) {
-    lua_State *l = jlong_to_ptr(ptr);
-    if (!isJavaObject(l, arg)) {
-        throw_LuaException(env, "Not java object");
-        return 0;
-    }
-    jobject *object = lua_touserdata(l, arg);
-    return *object;
-}
 
 
 static void
@@ -495,65 +485,6 @@ Java_mao_commons_jlua_LuaJNI_openLibs0(JNIEnv *env, jclass clazz, jlong ptr) {
 }
 
 
-static jlong
-Java_mao_commons_jlua_LuaJNI_checkInteger0(JNIEnv *env, jclass clazz, jlong ptr, jint arg) {
-    lua_State *l = jlong_to_ptr(ptr);
-    int isnum;
-    lua_Integer d = lua_tointegerx(l, arg, &isnum);
-    if (!isnum) {
-        throw_LuaException(env, "number has no integer representation");
-    }
-    return d;
-}
-
-static jdouble
-Java_mao_commons_jlua_LuaJNI_checkNumber0(JNIEnv *env, jclass clazz, jlong ptr, jint arg) {
-    lua_State *l = jlong_to_ptr(ptr);
-    int isnum;
-    lua_Number d = lua_tonumberx(l, arg, &isnum);
-    if (!isnum) {
-        throw_LuaException(env, "number has no number representation");
-    }
-    return d;
-}
-
-static jstring
-Java_mao_commons_jlua_LuaJNI_checkLString0(JNIEnv *env, jclass clazz, jlong ptr, jint arg) {
-    lua_State *l = jlong_to_ptr(ptr);
-
-    const char *s = lua_tolstring(l, arg, NULL);
-    if (!s) {
-        throw_LuaException(env, "no string");
-        return NULL;
-    }
-    return (*env)->NewStringUTF(env, s);
-}
-
-static jbyteArray
-Java_mao_commons_jlua_LuaJNI_checkLuaBytes0(JNIEnv *env, jclass clazz, jlong ptr, jint arg) {
-    lua_State *l = jlong_to_ptr(ptr);
-
-    size_t len;
-
-    const char *s = lua_tolstring(l, arg, &len);
-    if (!s) {
-        throw_LuaException(env, "no string");
-        return NULL;
-    }
-    jbyteArray bArr = (*env)->NewByteArray(env, len);
-    (*env)->SetByteArrayRegion(env, bArr, 0, len, (const jbyte *) s);
-    return bArr;
-}
-
-
-static void
-Java_mao_commons_jlua_LuaJNI_checkType0(JNIEnv *env, jclass clazz, jlong ptr, jint arg, jint t) {
-    lua_State *l = jlong_to_ptr(ptr);
-    if (lua_type(l, arg) != t) {
-        throw_LuaException(env, lua_typename(l, t));
-    }
-}
-
 static jint
 Java_mao_commons_jlua_LuaJNI_ref0(JNIEnv *env, jclass clazz, jlong ptr, jint t) {
     lua_State *l = jlong_to_ptr(ptr);
@@ -619,8 +550,6 @@ static const JNINativeMethod methods[] = {
         {"isJavaObject0",    "(JI)Z",                                      (void *) Java_mao_commons_jlua_LuaJNI_isJavaObject0},
 
         {"toJavaObject0",    "(JI)Ljava/lang/Object;",                     (void *) Java_mao_commons_jlua_LuaJNI_toJavaObject0},
-
-        {"checkJavaObject0", "(JI)Ljava/lang/Object;",                     (void *) Java_mao_commons_jlua_LuaJNI_checkJavaObject0},
 
         {"pushString0",      "(JLjava/lang/String;)V",                     (void *) Java_mao_commons_jlua_LuaJNI_pushString0},
 
@@ -689,16 +618,6 @@ static const JNINativeMethod methods[] = {
 
         {"openLibs0",        "(J)V",                                       (void *) Java_mao_commons_jlua_LuaJNI_openLibs0},
 
-        {"checkInteger0",    "(JI)J",                                      (void *) Java_mao_commons_jlua_LuaJNI_checkInteger0},
-
-        {"checkNumber0",     "(JI)D",                                      (void *) Java_mao_commons_jlua_LuaJNI_checkNumber0},
-
-        {"checkLString0",    "(JI)Ljava/lang/String;",                     (void *) Java_mao_commons_jlua_LuaJNI_checkLString0},
-
-        {"checkLuaBytes0",   "(JI)[B",                                     (void *) Java_mao_commons_jlua_LuaJNI_checkLuaBytes0},
-
-        {"checkType0",       "(JII)V",                                     (void *) Java_mao_commons_jlua_LuaJNI_checkType0},
-
         {"ref0",             "(JI)I",                                      (void *) Java_mao_commons_jlua_LuaJNI_ref0},
 
         {"unref0",           "(JII)V",                                     (void *) Java_mao_commons_jlua_LuaJNI_unref0},
@@ -724,11 +643,6 @@ static jboolean registerNativeMethods(JNIEnv *env) {
     return JNI_TRUE;
 }
 
-
-static void initIntConstant(JNIEnv *env, jclass c, const char *fieldName, int value) {
-    jfieldID field = (*env)->GetStaticFieldID(env, c, fieldName, "I");
-    (*env)->SetStaticIntField(env, c, field, value);
-}
 
 
 void register_luaJNI(JNIEnv *env) {
