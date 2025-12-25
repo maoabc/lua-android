@@ -1,6 +1,5 @@
 package mao.commons.jlua;
 
-import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -9,7 +8,8 @@ import dalvik.annotation.optimization.FastNative;
 
 class LuaJNI {
     public static final int LUAI_MAXSTACK = 1000000;
-    public static final int LUA_REGISTRYINDEX = -LUAI_MAXSTACK - 1000;
+    //这里不从native层设置，就是为了java层upValueIndex时它被编译器优化为常量
+    public static final int LUA_REGISTRYINDEX = (-(0x7FFFFFFF/2 + 1000));
 
 
     static {
@@ -56,6 +56,7 @@ class LuaJNI {
     @FastNative
     static native void pushClosure0(long ptr, long funcPtr, int n);
 
+    @FastNative
     static native void pushJavaObject0(long ptr, Object obj);
 
     @FastNative
@@ -172,7 +173,6 @@ class LuaJNI {
     @FastNative
     static native void unref0(long ptr, int t, int ref);
 
-//    static native void error0(long ptr, String msg);
 
     static native void exit0(long ptr);
 

@@ -168,6 +168,15 @@ public class LuaState implements Closeable {
         return LuaJNI.LUA_REGISTRYINDEX - idx;
     }
 
+    /**
+     * 把java对象放入lua栈
+     * lua使用userdata存储java对象引入，然后元方法__gc中释放引用，
+     * 这样java对象生命交给lua管理
+     * 它不会做多余的事，只是标识这是java对象以及__gc中释放引用，
+     * 其他操作需要后续添加元方法
+     *
+     * @param obj java对象
+     */
     public void pushJavaObject(Object obj) {
         LuaJNI.pushJavaObject0(ptr, obj);
     }

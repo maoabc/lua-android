@@ -46,6 +46,7 @@ public abstract class CJFunction {
     protected abstract int call(LuaState luaState) throws Throwable;
 
 
+    @FastNative
     private static native long createClosure0(CJFunction function);
 
     @FastNative
@@ -54,5 +55,6 @@ public abstract class CJFunction {
     @FastNative
     private static native CJFunction getJFunction0(long ptr);
 
+    @FastNative
     private static native void freeClosure0(long ptr);
 }

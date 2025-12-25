@@ -2,6 +2,9 @@ package mao.commons.jlua;
 
 import dalvik.annotation.optimization.CriticalNative;
 
+/**
+ * 使用CriticalNative优化的本地方法，因为不能向后兼容所以独立出来
+ */
 class FastLuaJNI {
 
     //lua.h
