@@ -21,7 +21,7 @@ static int traceback(lua_State *L) {
 }
 
 static int
-Java_mao_commons_jlua_LuaCallbackContext_newContext0(JNIEnv *env, jclass clazz,
+Java_mao_commons_jlua_LuaJNI_newContext0(JNIEnv *env, jclass clazz,
                                                      jlong ptr, jlongArray out) {
     lua_State *l = jlong_to_ptr(ptr);
 
@@ -40,13 +40,13 @@ Java_mao_commons_jlua_LuaCallbackContext_newContext0(JNIEnv *env, jclass clazz,
 
 static const JNINativeMethod methods[] = {
         {"newContext0", "(J[J)I",
-         (void *) Java_mao_commons_jlua_LuaCallbackContext_newContext0},
+         (void *) Java_mao_commons_jlua_LuaJNI_newContext0},
 
 };
 
 
 jboolean register_callback_context(JNIEnv *env) {
-    jclass clazz = (*env)->FindClass(env, "mao/commons/jlua/LuaCallbackContext");
+    jclass clazz = (*env)->FindClass(env, "mao/commons/jlua/LuaJNI");
     if (clazz == NULL) {
         return JNI_FALSE;
     }

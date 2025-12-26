@@ -3,6 +3,7 @@ package mao.commons.jlua;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.Size;
 
 import dalvik.annotation.optimization.FastNative;
 
@@ -175,6 +176,10 @@ class LuaJNI {
 
 
     static native void exit0(long ptr);
+
+
+    @FastNative
+    static native int newContext0(long ptr, @Size(1) long[] newPtr);
 
 
 }

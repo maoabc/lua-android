@@ -4,6 +4,10 @@ import androidx.annotation.NonNull;
 
 import java.io.Closeable;
 
+/**
+ * 包装c层的lua_State指针，默认不实现生命周期管理，
+ * 需要处理生命周期需要继承实现子类来释放指针
+ */
 public class LuaState implements Closeable {
 
     //用于判断是否使用优化的native方法
@@ -49,17 +53,49 @@ public class LuaState implements Closeable {
         this.ptr = ptr;
     }
 
+    /**
+     * 创建带生命管理的lua_state, 主动由close释放，finalize最后兜底可能没释放的
+     *
+     * @return
+     */
     public static LuaState create() {
         final LuaState luaState;
+        final long ptr = LuaJNI.newState0();
         if (useCriticalNative) {
-            luaState = new FinalizeFastLuaState();
+            luaState = new FastLuaState(ptr) {
+                @Override
+                public void close() {
+                    internalClose();
+                }
+
+                @Override
+                protected void finalize() throws Throwable {
+                    internalClose();
+                }
+            };
         } else {
-            luaState = new FinalizeLuaState();
+            luaState = new LuaState(ptr) {
+                @Override
+                public void close() {
+                    internalClose();
+                }
+
+                @Override
+                protected void finalize() throws Throwable {
+                    internalClose();
+                }
+            };
         }
         luaState.openLibs();
         return luaState;
     }
 
+    /**
+     * 只简单包裹lua_state,不处理任何生命相关
+     *
+     * @param ptr c层的lua_state指针
+     * @return
+     */
     static LuaState wrap(long ptr) {
         if (ptr == 0) {
             throw new IllegalArgumentException("ptr is null");
@@ -69,6 +105,7 @@ public class LuaState implements Closeable {
         }
         return new LuaState(ptr);
     }
+
 
     public void openLibs() {
         LuaJNI.openLibs0(ptr);
@@ -403,26 +440,12 @@ public class LuaState implements Closeable {
         LuaJNI.unref0(ptr, t, ref);
     }
 
-
-    private static final class FinalizeLuaState extends LuaState {
-
-        FinalizeLuaState() {
-            super(LuaJNI.newState0());
-        }
-
-        @Override
-        public void close() {
-            synchronized (this) {
-                if (ptr != 0) {
-                    LuaJNI.close0(ptr);
-                    ptr = 0;
-                }
+    protected final void internalClose() {
+        synchronized (this) {
+            if (ptr != 0) {
+                LuaJNI.close0(ptr);
+                ptr = 0;
             }
-        }
-
-        @Override
-        protected void finalize() throws Throwable {
-            close();
         }
     }
 
@@ -546,28 +569,6 @@ public class LuaState implements Closeable {
         @Override
         public final int getTop() {
             return FastLuaJNI.getTop0(ptr);
-        }
-    }
-
-    private static final class FinalizeFastLuaState extends FastLuaState {
-
-        FinalizeFastLuaState() {
-            super(LuaJNI.newState0());
-        }
-
-        @Override
-        public void close() {
-            synchronized (this) {
-                if (ptr != 0) {
-                    LuaJNI.close0(ptr);
-                    ptr = 0;
-                }
-            }
-        }
-
-        @Override
-        protected void finalize() throws Throwable {
-            close();
         }
     }
 
