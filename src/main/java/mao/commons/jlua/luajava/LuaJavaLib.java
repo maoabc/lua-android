@@ -61,6 +61,7 @@ public class LuaJavaLib {
         }
     };
 
+    //todo 这里没正确实现，没用到先不管
     private final CJFunction loadLibFunction = new CJFunction() {
         @Override
         protected int call(LuaState l) throws Throwable {

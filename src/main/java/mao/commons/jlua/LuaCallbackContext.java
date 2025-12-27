@@ -4,7 +4,7 @@ package mao.commons.jlua;
 import java.io.Closeable;
 
 /**
- * 栈顶是一个tab或者函数,包含java方法名及对应的lua回调函数,
+ * 栈顶是一个table或者函数, table需要包含java方法名及对应的lua回调函数,
  * 生成一个全新luaState用来调用回调函数
  * 生命周期跟随java对象
  */

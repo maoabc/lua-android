@@ -449,6 +449,7 @@ public class LuaState implements Closeable {
         }
     }
 
+    // 栈操作相关方法使用CriticalNative进行加速
     private static class FastLuaState extends LuaState {
 
         protected FastLuaState(long ptr) {

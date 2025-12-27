@@ -95,11 +95,7 @@ Java_mao_commons_jlua_CJFunction_getCFunction0(JNIEnv *env, jclass clazz, jlong 
     return ptr_to_jlong(funcSt->func);
 }
 
-static jobject
-Java_mao_commons_jlua_CJFunction_getJFunction0(JNIEnv *env, jclass clazz, jlong ptr) {
-    callback_func_st *funcSt = jlong_to_ptr(ptr);
-    return (jobject) funcSt->closure.user_data;
-}
+
 
 static void
 Java_mao_commons_jlua_CJFunction_freeClosure0(JNIEnv *env, jclass clazz, jlong ptr) {
@@ -117,8 +113,6 @@ static const JNINativeMethod methods[] = {
         {"createClosure0", "(Lmao/commons/jlua/CJFunction;)J", (void *) Java_mao_commons_jlua_CJFunction_createClosure0},
 
         {"getCFunction0",  "(J)J",                             (void *) Java_mao_commons_jlua_CJFunction_getCFunction0},
-
-        {"getJFunction0",  "(J)Lmao/commons/jlua/CJFunction;", (void *) Java_mao_commons_jlua_CJFunction_getJFunction0},
 
         {"freeClosure0",   "(J)V",                             (void *) Java_mao_commons_jlua_CJFunction_freeClosure0},
 
