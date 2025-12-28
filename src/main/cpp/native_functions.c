@@ -8,9 +8,9 @@
 
 static int traceback(lua_State *L) {
     const char *msg = lua_tostring(L, 1);
-    if (msg)
+    if (msg) {
         luaL_traceback(L, L, msg, 1);
-    else {
+    } else {
         lua_pushliteral(L, "(no error message)");
     }
     return 1;

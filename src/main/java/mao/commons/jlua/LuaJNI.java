@@ -10,7 +10,7 @@ import dalvik.annotation.optimization.FastNative;
 class LuaJNI {
     public static final int LUAI_MAXSTACK = 1000000;
     //这里不从native层设置，就是为了java层upValueIndex时它被编译器优化为常量
-    public static final int LUA_REGISTRYINDEX = (-(0x7FFFFFFF/2 + 1000));
+    public static final int LUA_REGISTRYINDEX = (-(0x7FFFFFFF / 2 + 1000));
 
 
     static {
@@ -137,10 +137,10 @@ class LuaJNI {
     static native void createTable0(long ptr, int narr, int nrec);
 
     @FastNative
-    static native int getField0(long ptr, int idx, String key);
+    static native int getField0(long ptr, int idx, @NonNull String key);
 
     @FastNative
-    static native void setField0(long ptr, int idx, String key);
+    static native void setField0(long ptr, int idx, @NonNull String key);
 
     @FastNative
     static native int rawGetI0(long ptr, int idx, int n);

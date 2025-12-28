@@ -22,6 +22,10 @@ public final class LuaCallbackContext implements Closeable {
         final long[] newL = new long[1];
         ref = LuaJNI.newContext0(luaState.ptr, newL);
         this.l = LuaState.wrap(newL[0]);
+        //栈底放入错误处理函数
+        l.pushCFunction(UtilFunctions.traceback());
+        l.insert(1);
+
     }
 
 

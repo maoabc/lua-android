@@ -85,7 +85,7 @@ try (final LuaState state = LuaState.create()) {
     state.pushString("__index");
     state.pushClosure(indexFunc, 0);
     state.rawSet(-3);
-    state.setTop(1);
+    state.pop(1);
 
     state.setGlobal("mys");
 

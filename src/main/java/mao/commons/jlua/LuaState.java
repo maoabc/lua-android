@@ -187,6 +187,12 @@ public class LuaState implements Closeable {
         return LuaJNI.toNumber0(ptr, idx);
     }
 
+    /**
+     * 需要在栈底放入错误处理函数
+     *
+     * @param nargs    参数数量
+     * @param nresults 返回值数量
+     */
     public void call(int nargs, int nresults) {
         if (LuaJNI.pcall0(ptr, nargs, nresults, 1) != LUA_OK) {
             String traceback = "";
@@ -393,10 +399,16 @@ public class LuaState implements Closeable {
     }
 
     public int getField(int idx, String key) {
+        if (key == null) {
+            throw new NullPointerException("key is null");
+        }
         return LuaJNI.getField0(ptr, idx, key);
     }
 
     public void setField(int idx, String key) {
+        if (key == null) {
+            throw new NullPointerException("key is null");
+        }
         LuaJNI.setField0(ptr, idx, key);
     }
 

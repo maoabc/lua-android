@@ -10,15 +10,6 @@ typedef struct {
     lua_State *L;
 } callback_context;
 
-static int traceback(lua_State *L) {
-    const char *msg = lua_tostring(L, 1);
-    if (msg)
-        luaL_traceback(L, L, msg, 1);
-    else {
-        lua_pushliteral(L, "(no error message)");
-    }
-    return 1;
-}
 
 static int
 Java_mao_commons_jlua_LuaJNI_newContext0(JNIEnv *env, jclass clazz,
@@ -27,7 +18,6 @@ Java_mao_commons_jlua_LuaJNI_newContext0(JNIEnv *env, jclass clazz,
 
     callback_context *ctx = lua_newuserdata(l, sizeof(callback_context));
     ctx->L = lua_newthread(l);
-    lua_pushcfunction(ctx->L, traceback);
     lua_setuservalue(l, -2);
     int ref = luaL_ref(l, LUA_REGISTRYINDEX);
     lua_xmove(l, ctx->L, 1);

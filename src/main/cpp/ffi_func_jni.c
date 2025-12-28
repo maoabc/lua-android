@@ -11,26 +11,6 @@
 
 static jclass cj_func_cls;
 
-#define CHECK_JAVA_EXCEPTION(_env, _L)                                               \
-{                                                                                    \
-    jthrowable occurred = (*_env)->ExceptionOccurred(_env);                          \
-    if (occurred != NULL) {                                                          \
-        (*_env)->ExceptionClear(_env);                                               \
-        jobject str = (*_env)->CallObjectMethod(_env, occurred, getMessageMethodId); \
-        if (str == NULL) {                                                           \
-            str = (*_env)->CallObjectMethod(_env, occurred, toStringMethodId);       \
-        }                                                                            \
-        if (str != NULL) {                                                           \
-            const char *utfChars = (*_env)->GetStringUTFChars(_env, str, NULL);      \
-            lua_pushstring(_L, utfChars);                                            \
-            (*_env)->ReleaseStringUTFChars(_env, str, utfChars);                     \
-            (*_env)->DeleteLocalRef(_env, str);                                      \
-        }                                                                            \
-        (*_env)->DeleteLocalRef(_env, occurred);                                     \
-        lua_error(_L);                                                               \
-    }                                                                                \
-}
-
 
 static void callback(ffi_cif *cif,
                      void *ret,
@@ -48,7 +28,26 @@ static void callback(ffi_cif *cif,
                                                    ptr_to_jlong(l));
 
     //检测异常
-    CHECK_JAVA_EXCEPTION(env, l);
+    {
+        jthrowable occurred = (*env)->ExceptionOccurred(env);
+        if (occurred) {
+            (*env)->ExceptionClear(env);
+            jobject str = (*env)->CallObjectMethod(env, occurred, getMessageMethodId);
+            if (!str) {
+                str = (*env)->CallObjectMethod(env, occurred, toStringMethodId);
+            }
+            if (str) {
+                const char *utfChars = (*env)->GetStringUTFChars(env, str, NULL);
+                lua_pushstring(l, utfChars);
+                (*env)->ReleaseStringUTFChars(env, str, utfChars);
+                (*env)->DeleteLocalRef(env, str);
+            } else {
+                lua_pushliteral(l, "no exception message");
+            }
+            (*env)->DeleteLocalRef(env, occurred);
+            lua_error(l);
+        }
+    };
 
 }
 
@@ -76,14 +75,12 @@ Java_mao_commons_jlua_CJFunction_createClosure0(JNIEnv *env, jclass clazz, jobje
 
     if (ffi_prep_cif(&funcSt->cif, FFI_DEFAULT_ABI, 1, &ffi_type_sint32, funcSt->args) != FFI_OK) {
         ffi_closure_free(funcSt);
-        throw_LuaException(env, "create native closure failed");
         return 0;
     }
     jobject weakFunc = (*env)->NewWeakGlobalRef(env, function);
     if (ffi_prep_closure_loc(&funcSt->closure, &funcSt->cif, callback, weakFunc, func) != FFI_OK) {
         (*env)->DeleteWeakGlobalRef(env, weakFunc);
         ffi_closure_free(funcSt);
-        throw_LuaException(env, "create native closure failed");
         return 0;
     }
     return ptr_to_jlong(funcSt);
@@ -94,7 +91,6 @@ Java_mao_commons_jlua_CJFunction_getCFunction0(JNIEnv *env, jclass clazz, jlong 
     callback_func_st *funcSt = jlong_to_ptr(ptr);
     return ptr_to_jlong(funcSt->func);
 }
-
 
 
 static void

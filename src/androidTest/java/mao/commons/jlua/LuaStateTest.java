@@ -10,6 +10,7 @@ public class LuaStateTest {
         try (
                 final LuaState l = LuaState.create();
         ) {
+            l.pushCFunction(UtilFunctions.traceback());
             //测试代码，函数写成局部变量，不过马上整个环境就失效，所以没生命周期问题
             final CJFunction addFunc = new CJFunction() {
                 @Override
@@ -33,11 +34,52 @@ public class LuaStateTest {
         }
     }
 
+    public static void asyncTask(LuaCallbackContext context) {
+        if (!context.l.isFunction(-1)) {
+            throw new IllegalStateException("Not a function");
+        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                //耗时任务执行
+                //回调lua
+                context.l.pushString("java task finish");
+                context.l.call(1, 1);
+
+            }
+        }).start();
+
+    }
+
     @Test
-    public void test2() {
+    public void testCallback() throws Exception {
         try (
-                final LuaState l = LuaState.create();
+                LuaState l = LuaState.create();
         ) {
+            l.pushCFunction(UtilFunctions.traceback());
+
+            final CJFunction asyncFunc = new CJFunction() {
+                @Override
+                protected int call(LuaState luaState) {
+                    final LuaCallbackContext context = new LuaCallbackContext(luaState);
+                    asyncTask(context);
+                    return 0;
+                }
+            };
+            l.pushFunction(asyncFunc);
+            l.setGlobal("asyncTask");
+
+            l.loadBuffer(
+                    "local function task(n) \n" +
+                            "print(n)\n" +
+                            "end\n" +
+                            "\n" +
+                            "asyncTask(task)" +
+                            "\n");
+            l.call(0, 0);
+
+            Thread.sleep(3000);
+
 
         }
     }
@@ -75,6 +117,8 @@ public class LuaStateTest {
     @Test
     public void testJavaObject() {
         try (final LuaState state = LuaState.create()) {
+            state.pushCFunction(UtilFunctions.traceback());
+
             Object obj = Class.class;
             state.pushJavaObject(obj);
 
@@ -105,7 +149,7 @@ public class LuaStateTest {
             state.pushString("__index");
             state.pushClosure(indexFunc, 0);
             state.rawSet(-3);
-            state.setTop(1);
+            state.pop(1);
 
             state.setGlobal("mys");
 

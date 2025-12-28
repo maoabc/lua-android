@@ -39,7 +39,7 @@ set(SRC_FILES
         src/ltm.c
         src/lopcodes.c
 
-        src/android_log.c
+        android_log.c
         )
 
 add_definitions(-DLUA_USE_C99 -Wall -Wextra )
@@ -48,6 +48,12 @@ add_definitions(-DLUA_USE_C99 -Wall -Wextra )
 add_definitions(-DLUA_UCID)
 
 add_library(lua_static STATIC ${SRC_FILES})
+
+
+target_precompile_headers(lua_static PRIVATE
+        "android_log.h"
+)
+
 
 target_include_directories(lua_static PUBLIC src)
 
