@@ -102,7 +102,6 @@ Java_mao_commons_jlua_FastLuaJNI_getTop0(jlong ptr) {
 }
 
 
-
 static jint
 Java_mao_commons_jlua_FastLuaJNI_type0(jlong ptr, jint idx) {
     lua_State *l = jlong_to_ptr(ptr);
@@ -123,14 +122,11 @@ Java_mao_commons_jlua_FastLuaJNI_remove0(jlong ptr, jint idx) {
 }
 
 
-
-
 static void
-Java_mao_commons_jlua_FastLuaJNI_insert0(jlong ptr, jint idx) {
+Java_mao_commons_jlua_FastLuaJNI_rotate0(jlong ptr, jint idx, int n) {
     lua_State *l = jlong_to_ptr(ptr);
-    lua_insert(l, idx);
+    lua_rotate(l, idx, n);
 }
-
 
 
 #define NELEM(x) ((int) (sizeof(x) / sizeof((x)[0])))
@@ -138,43 +134,43 @@ Java_mao_commons_jlua_FastLuaJNI_insert0(jlong ptr, jint idx) {
 
 static const JNINativeMethod methods[] = {
 
-        {"pushInteger0",  "(JJ)V",  (void *) Java_mao_commons_jlua_FastLuaJNI_pushInteger0},
+        {"pushInteger0", "(JJ)V",  (void *) Java_mao_commons_jlua_FastLuaJNI_pushInteger0},
 
-        {"toInteger0",    "(JI)J",  (void *) Java_mao_commons_jlua_FastLuaJNI_toInteger0},
+        {"toInteger0",   "(JI)J",  (void *) Java_mao_commons_jlua_FastLuaJNI_toInteger0},
 
-        {"isInteger0",    "(JI)Z",  (void *) Java_mao_commons_jlua_FastLuaJNI_isInteger0},
+        {"isInteger0",   "(JI)Z",  (void *) Java_mao_commons_jlua_FastLuaJNI_isInteger0},
 
-        {"isFloat0",      "(JI)Z",  (void *) Java_mao_commons_jlua_FastLuaJNI_isFloat0},
+        {"isFloat0",     "(JI)Z",  (void *) Java_mao_commons_jlua_FastLuaJNI_isFloat0},
 
-        {"pushBoolean0",  "(JZ)V",  (void *) Java_mao_commons_jlua_FastLuaJNI_pushBoolean0},
+        {"pushBoolean0", "(JZ)V",  (void *) Java_mao_commons_jlua_FastLuaJNI_pushBoolean0},
 
-        {"isBoolean0",    "(JI)Z",  (void *) Java_mao_commons_jlua_FastLuaJNI_isBoolean0},
+        {"isBoolean0",   "(JI)Z",  (void *) Java_mao_commons_jlua_FastLuaJNI_isBoolean0},
 
-        {"toBoolean0",    "(JI)Z",  (void *) Java_mao_commons_jlua_FastLuaJNI_toBoolean0},
+        {"toBoolean0",   "(JI)Z",  (void *) Java_mao_commons_jlua_FastLuaJNI_toBoolean0},
 
-        {"pushNumber0",   "(JD)V",  (void *) Java_mao_commons_jlua_FastLuaJNI_pushNumber0},
+        {"pushNumber0",  "(JD)V",  (void *) Java_mao_commons_jlua_FastLuaJNI_pushNumber0},
 
-        {"isNumber0",     "(JI)Z",  (void *) Java_mao_commons_jlua_FastLuaJNI_isNumber0},
+        {"isNumber0",    "(JI)Z",  (void *) Java_mao_commons_jlua_FastLuaJNI_isNumber0},
 
-        {"toNumber0",     "(JI)D",  (void *) Java_mao_commons_jlua_FastLuaJNI_toNumber0},
+        {"toNumber0",    "(JI)D",  (void *) Java_mao_commons_jlua_FastLuaJNI_toNumber0},
 
-        {"pushClosure0",  "(JJI)V", (void *) Java_mao_commons_jlua_FastLuaJNI_pushClosure0},
+        {"pushClosure0", "(JJI)V", (void *) Java_mao_commons_jlua_FastLuaJNI_pushClosure0},
 
-        {"pushValue0",    "(JI)V",  (void *) Java_mao_commons_jlua_FastLuaJNI_pushValue0},
+        {"pushValue0",   "(JI)V",  (void *) Java_mao_commons_jlua_FastLuaJNI_pushValue0},
 
-        {"isString0",     "(JI)Z",  (void *) Java_mao_commons_jlua_FastLuaJNI_isString0},
+        {"isString0",    "(JI)Z",  (void *) Java_mao_commons_jlua_FastLuaJNI_isString0},
 
-        {"setTop0",       "(JI)V",  (void *) Java_mao_commons_jlua_FastLuaJNI_setTop0},
+        {"setTop0",      "(JI)V",  (void *) Java_mao_commons_jlua_FastLuaJNI_setTop0},
 
-        {"getTop0",       "(J)I",   (void *) Java_mao_commons_jlua_FastLuaJNI_getTop0},
+        {"getTop0",      "(J)I",   (void *) Java_mao_commons_jlua_FastLuaJNI_getTop0},
 
-        {"type0",         "(JI)I",  (void *) Java_mao_commons_jlua_FastLuaJNI_type0},
+        {"type0",        "(JI)I",  (void *) Java_mao_commons_jlua_FastLuaJNI_type0},
 
-        {"pushNil0",      "(J)V",   (void *) Java_mao_commons_jlua_FastLuaJNI_pushNil0},
+        {"pushNil0",     "(J)V",   (void *) Java_mao_commons_jlua_FastLuaJNI_pushNil0},
 
-        {"remove0",       "(JI)V",  (void *) Java_mao_commons_jlua_FastLuaJNI_remove0},
+        {"remove0",      "(JI)V",  (void *) Java_mao_commons_jlua_FastLuaJNI_remove0},
 
-        {"insert0",       "(JI)V",  (void *) Java_mao_commons_jlua_FastLuaJNI_insert0},
+        {"rotate0",      "(JII)V", (void *) Java_mao_commons_jlua_FastLuaJNI_rotate0},
 
 };
 

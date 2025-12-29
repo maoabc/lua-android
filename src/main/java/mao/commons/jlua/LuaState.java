@@ -147,7 +147,11 @@ public class LuaState implements Closeable {
     }
 
     public void insert(int idx) {
-        LuaJNI.insert0(ptr, idx);
+        LuaJNI.rotate0(ptr, idx, 1);
+    }
+
+    public void rotate(int idx, int n) {
+        LuaJNI.rotate0(ptr, idx, n);
     }
 
     public void pushInt32(int i) {
@@ -428,6 +432,10 @@ public class LuaState implements Closeable {
         LuaJNI.createTable0(ptr, 0, 0);
     }
 
+    public void newTable(int narr, int nrec) {
+        LuaJNI.createTable0(ptr, narr, nrec);
+    }
+
     public boolean next(int idx) {
         return LuaJNI.next0(ptr, idx);
     }
@@ -496,7 +504,11 @@ public class LuaState implements Closeable {
 
         @Override
         public final void insert(int idx) {
-            FastLuaJNI.insert0(ptr, idx);
+            FastLuaJNI.rotate0(ptr, idx, 1);
+        }
+
+        public void rotate(int idx, int n) {
+            FastLuaJNI.rotate0(ptr, idx, n);
         }
 
         @Override

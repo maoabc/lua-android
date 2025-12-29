@@ -64,7 +64,7 @@ class FastLuaJNI {
     static native void remove0(long ptr, int idx);
 
     @CriticalNative
-    static native void insert0(long ptr, int idx);
+    static native void rotate0(long ptr, int idx, int n);
 
 
 }

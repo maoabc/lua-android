@@ -261,7 +261,6 @@ Java_mao_commons_jlua_LuaJNI_toJavaObject0(JNIEnv *env, jclass clazz, jlong ptr,
 }
 
 
-
 static void
 Java_mao_commons_jlua_LuaJNI_setTable0(JNIEnv *env, jclass clazz, jlong ptr, jint idx) {
     lua_State *l = jlong_to_ptr(ptr);
@@ -372,10 +371,7 @@ static jint
 Java_mao_commons_jlua_LuaJNI_getField0(JNIEnv *env, jclass clazz, jlong ptr,
                                        jint idx, jstring key) {
     lua_State *l = jlong_to_ptr(ptr);
-    if (key == NULL) {
-        throw_LuaException(env, "key is null");
-        return 0;
-    }
+
     const char *k = (*env)->GetStringUTFChars(env, key, NULL);
 
     int ret = lua_getfield(l, idx, k);
@@ -389,10 +385,7 @@ static void
 Java_mao_commons_jlua_LuaJNI_setField0(JNIEnv *env, jclass clazz, jlong ptr,
                                        jint idx, jstring key) {
     lua_State *l = jlong_to_ptr(ptr);
-    if (key == NULL) {
-        throw_LuaException(env, "key is null");
-        return;
-    }
+
     const char *k = (*env)->GetStringUTFChars(env, key, NULL);
 
     lua_setfield(l, idx, k);
@@ -433,9 +426,9 @@ Java_mao_commons_jlua_LuaJNI_next0(JNIEnv *env, jclass clazz, jlong ptr, jint id
 }
 
 static void
-Java_mao_commons_jlua_LuaJNI_insert0(JNIEnv *env, jclass clazz, jlong ptr, jint idx) {
+Java_mao_commons_jlua_LuaJNI_rotate0(JNIEnv *env, jclass clazz, jlong ptr, jint idx, jint n) {
     lua_State *l = jlong_to_ptr(ptr);
-    lua_insert(l, idx);
+    lua_rotate(l, idx, n);
 }
 
 
@@ -521,110 +514,108 @@ Java_mao_commons_jlua_LuaJNI_exit0(JNIEnv *env, jclass clazz, jlong ptr) {
 
 
 static const JNINativeMethod methods[] = {
-        {"newState0",        "()J",                                        (void *) Java_mao_commons_jlua_LuaJNI_newState0},
+        {"newState0",       "()J",                                        (void *) Java_mao_commons_jlua_LuaJNI_newState0},
 
-        {"pushInteger0",     "(JJ)V",                                      (void *) Java_mao_commons_jlua_LuaJNI_pushInteger0},
+        {"pushInteger0",    "(JJ)V",                                      (void *) Java_mao_commons_jlua_LuaJNI_pushInteger0},
 
-        {"toInteger0",       "(JI)J",                                      (void *) Java_mao_commons_jlua_LuaJNI_toInteger0},
+        {"toInteger0",      "(JI)J",                                      (void *) Java_mao_commons_jlua_LuaJNI_toInteger0},
 
-        {"isInteger0",       "(JI)Z",                                      (void *) Java_mao_commons_jlua_LuaJNI_isInteger0},
+        {"isInteger0",      "(JI)Z",                                      (void *) Java_mao_commons_jlua_LuaJNI_isInteger0},
 
-        {"isFloat0",         "(JI)Z",                                      (void *) Java_mao_commons_jlua_LuaJNI_isFloat0},
+        {"isFloat0",        "(JI)Z",                                      (void *) Java_mao_commons_jlua_LuaJNI_isFloat0},
 
-        {"pushBoolean0",     "(JZ)V",                                      (void *) Java_mao_commons_jlua_LuaJNI_pushBoolean0},
+        {"pushBoolean0",    "(JZ)V",                                      (void *) Java_mao_commons_jlua_LuaJNI_pushBoolean0},
 
-        {"isBoolean0",       "(JI)Z",                                      (void *) Java_mao_commons_jlua_LuaJNI_isBoolean0},
+        {"isBoolean0",      "(JI)Z",                                      (void *) Java_mao_commons_jlua_LuaJNI_isBoolean0},
 
-        {"toBoolean0",       "(JI)Z",                                      (void *) Java_mao_commons_jlua_LuaJNI_toBoolean0},
+        {"toBoolean0",      "(JI)Z",                                      (void *) Java_mao_commons_jlua_LuaJNI_toBoolean0},
 
-        {"pushNumber0",      "(JD)V",                                      (void *) Java_mao_commons_jlua_LuaJNI_pushNumber0},
+        {"pushNumber0",     "(JD)V",                                      (void *) Java_mao_commons_jlua_LuaJNI_pushNumber0},
 
-        {"isNumber0",        "(JI)Z",                                      (void *) Java_mao_commons_jlua_LuaJNI_isNumber0},
+        {"isNumber0",       "(JI)Z",                                      (void *) Java_mao_commons_jlua_LuaJNI_isNumber0},
 
-        {"toNumber0",        "(JI)D",                                      (void *) Java_mao_commons_jlua_LuaJNI_toNumber0},
+        {"toNumber0",       "(JI)D",                                      (void *) Java_mao_commons_jlua_LuaJNI_toNumber0},
 
-        {"pushClosure0",     "(JJI)V",                                     (void *) Java_mao_commons_jlua_LuaJNI_pushClosure0},
+        {"pushClosure0",    "(JJI)V",                                     (void *) Java_mao_commons_jlua_LuaJNI_pushClosure0},
 
-        {"pushJavaObject0",  "(JLjava/lang/Object;)V",                     (void *) Java_mao_commons_jlua_LuaJNI_pushJavaObject0},
+        {"pushJavaObject0", "(JLjava/lang/Object;)V",                     (void *) Java_mao_commons_jlua_LuaJNI_pushJavaObject0},
 
-        {"isJavaObject0",    "(JI)Z",                                      (void *) Java_mao_commons_jlua_LuaJNI_isJavaObject0},
+        {"isJavaObject0",   "(JI)Z",                                      (void *) Java_mao_commons_jlua_LuaJNI_isJavaObject0},
 
-        {"toJavaObject0",    "(JI)Ljava/lang/Object;",                     (void *) Java_mao_commons_jlua_LuaJNI_toJavaObject0},
+        {"toJavaObject0",   "(JI)Ljava/lang/Object;",                     (void *) Java_mao_commons_jlua_LuaJNI_toJavaObject0},
 
-        {"pushString0",      "(JLjava/lang/String;)V",                     (void *) Java_mao_commons_jlua_LuaJNI_pushString0},
+        {"pushString0",     "(JLjava/lang/String;)V",                     (void *) Java_mao_commons_jlua_LuaJNI_pushString0},
 
-        {"pushBytes0",       "(J[B)V",                                     (void *) Java_mao_commons_jlua_LuaJNI_pushBytes0},
+        {"pushBytes0",      "(J[B)V",                                     (void *) Java_mao_commons_jlua_LuaJNI_pushBytes0},
 
-        {"pushValue0",       "(JI)V",                                      (void *) Java_mao_commons_jlua_LuaJNI_pushValue0},
+        {"pushValue0",      "(JI)V",                                      (void *) Java_mao_commons_jlua_LuaJNI_pushValue0},
 
-        {"isString0",        "(JI)Z",                                      (void *) Java_mao_commons_jlua_LuaJNI_isString0},
+        {"isString0",       "(JI)Z",                                      (void *) Java_mao_commons_jlua_LuaJNI_isString0},
 
-        {"toLString0",       "(JI)Ljava/lang/String;",                     (void *) Java_mao_commons_jlua_LuaJNI_toLString0},
+        {"toLString0",      "(JI)Ljava/lang/String;",                     (void *) Java_mao_commons_jlua_LuaJNI_toLString0},
 
-        {"toRawString0",     "(JI)[B",                                     (void *) Java_mao_commons_jlua_LuaJNI_toRawString0},
+        {"toRawString0",    "(JI)[B",                                     (void *) Java_mao_commons_jlua_LuaJNI_toRawString0},
 
-        {"setTop0",          "(JI)V",                                      (void *) Java_mao_commons_jlua_LuaJNI_setTop0},
+        {"setTop0",         "(JI)V",                                      (void *) Java_mao_commons_jlua_LuaJNI_setTop0},
 
-        {"getTop0",          "(J)I",                                       (void *) Java_mao_commons_jlua_LuaJNI_getTop0},
+        {"getTop0",         "(J)I",                                       (void *) Java_mao_commons_jlua_LuaJNI_getTop0},
 
-        {"setTable0",        "(JI)V",                                      (void *) Java_mao_commons_jlua_LuaJNI_setTable0},
+        {"setTable0",       "(JI)V",                                      (void *) Java_mao_commons_jlua_LuaJNI_setTable0},
 
-        {"getTable0",        "(JI)I",                                      (void *) Java_mao_commons_jlua_LuaJNI_getTable0},
+        {"getTable0",       "(JI)I",                                      (void *) Java_mao_commons_jlua_LuaJNI_getTable0},
 
-        {"rawset0",          "(JI)V",                                      (void *) Java_mao_commons_jlua_LuaJNI_rawset0},
+        {"rawset0",         "(JI)V",                                      (void *) Java_mao_commons_jlua_LuaJNI_rawset0},
 
-        {"rawget0",          "(JI)I",                                      (void *) Java_mao_commons_jlua_LuaJNI_rawget0},
+        {"rawget0",         "(JI)I",                                      (void *) Java_mao_commons_jlua_LuaJNI_rawget0},
 
-        {"getMetatable0",    "(JI)I",                                      (void *) Java_mao_commons_jlua_LuaJNI_getMetatable0},
+        {"getMetatable0",   "(JI)I",                                      (void *) Java_mao_commons_jlua_LuaJNI_getMetatable0},
 
-        {"pcall0",           "(JIII)I",                                    (void *) Java_mao_commons_jlua_LuaJNI_pcall0},
+        {"pcall0",          "(JIII)I",                                    (void *) Java_mao_commons_jlua_LuaJNI_pcall0},
 
-        {"close0",           "(J)V",                                       (void *) Java_mao_commons_jlua_LuaJNI_close0},
+        {"close0",          "(J)V",                                       (void *) Java_mao_commons_jlua_LuaJNI_close0},
 
-        {"setGlobal0",       "(JLjava/lang/String;)V",                     (void *) Java_mao_commons_jlua_LuaJNI_setGlobal0},
+        {"setGlobal0",      "(JLjava/lang/String;)V",                     (void *) Java_mao_commons_jlua_LuaJNI_setGlobal0},
 
-        {"getGlobal0",       "(JLjava/lang/String;)I",                     (void *) Java_mao_commons_jlua_LuaJNI_getGlobal0},
+        {"getGlobal0",      "(JLjava/lang/String;)I",                     (void *) Java_mao_commons_jlua_LuaJNI_getGlobal0},
 
-        {"type0",            "(JI)I",                                      (void *) Java_mao_commons_jlua_LuaJNI_type0},
+        {"type0",           "(JI)I",                                      (void *) Java_mao_commons_jlua_LuaJNI_type0},
 
-        {"typeName0",        "(JI)Ljava/lang/String;",                     (void *) Java_mao_commons_jlua_LuaJNI_typeName0},
+        {"typeName0",       "(JI)Ljava/lang/String;",                     (void *) Java_mao_commons_jlua_LuaJNI_typeName0},
 
-        {"pushNil0",         "(J)V",                                       (void *) Java_mao_commons_jlua_LuaJNI_pushNil0},
+        {"pushNil0",        "(J)V",                                       (void *) Java_mao_commons_jlua_LuaJNI_pushNil0},
 
-        {"remove0",          "(JI)V",                                      (void *) Java_mao_commons_jlua_LuaJNI_remove0},
+        {"remove0",         "(JI)V",                                      (void *) Java_mao_commons_jlua_LuaJNI_remove0},
 
-        {"createTable0",     "(JII)V",                                     (void *) Java_mao_commons_jlua_LuaJNI_createTable0},
+        {"createTable0",    "(JII)V",                                     (void *) Java_mao_commons_jlua_LuaJNI_createTable0},
 
-        {"getField0",        "(JILjava/lang/String;)I",                    (void *) Java_mao_commons_jlua_LuaJNI_getField0},
+        {"getField0",       "(JILjava/lang/String;)I",                    (void *) Java_mao_commons_jlua_LuaJNI_getField0},
 
-        {"setField0",        "(JILjava/lang/String;)V",                    (void *) Java_mao_commons_jlua_LuaJNI_setField0},
+        {"setField0",       "(JILjava/lang/String;)V",                    (void *) Java_mao_commons_jlua_LuaJNI_setField0},
 
-        {"rawGetI0",         "(JII)I",                                     (void *) Java_mao_commons_jlua_LuaJNI_rawGetI0},
+        {"rawGetI0",        "(JII)I",                                     (void *) Java_mao_commons_jlua_LuaJNI_rawGetI0},
 
-        {"rawSetI0",         "(JII)V",                                     (void *) Java_mao_commons_jlua_LuaJNI_rawSetI0},
+        {"rawSetI0",        "(JII)V",                                     (void *) Java_mao_commons_jlua_LuaJNI_rawSetI0},
 
-        {"rawEqual0",        "(JII)Z",                                     (void *) Java_mao_commons_jlua_LuaJNI_rawequal0},
+        {"rawEqual0",       "(JII)Z",                                     (void *) Java_mao_commons_jlua_LuaJNI_rawequal0},
 
-        {"getI0",            "(JII)I",                                     (void *) Java_mao_commons_jlua_LuaJNI_getI0},
+        {"getI0",           "(JII)I",                                     (void *) Java_mao_commons_jlua_LuaJNI_getI0},
 
-        {"setI0",            "(JII)V",                                     (void *) Java_mao_commons_jlua_LuaJNI_setI0},
+        {"setI0",           "(JII)V",                                     (void *) Java_mao_commons_jlua_LuaJNI_setI0},
 
-        {"next0",            "(JI)Z",                                      (void *) Java_mao_commons_jlua_LuaJNI_next0},
+        {"next0",           "(JI)Z",                                      (void *) Java_mao_commons_jlua_LuaJNI_next0},
 
-        {"insert0",          "(JI)V",                                      (void *) Java_mao_commons_jlua_LuaJNI_insert0},
+        {"rotate0",         "(JII)V",                                     (void *) Java_mao_commons_jlua_LuaJNI_rotate0},
 
 
-        {"loadBufferx0",     "(J[BLjava/lang/String;Ljava/lang/String;)I", (void *) Java_mao_commons_jlua_LuaJNI_loadBufferx0},
+        {"loadBufferx0",    "(J[BLjava/lang/String;Ljava/lang/String;)I", (void *) Java_mao_commons_jlua_LuaJNI_loadBufferx0},
 
-        {"openLibs0",        "(J)V",                                       (void *) Java_mao_commons_jlua_LuaJNI_openLibs0},
+        {"openLibs0",       "(J)V",                                       (void *) Java_mao_commons_jlua_LuaJNI_openLibs0},
 
-        {"ref0",             "(JI)I",                                      (void *) Java_mao_commons_jlua_LuaJNI_ref0},
+        {"ref0",            "(JI)I",                                      (void *) Java_mao_commons_jlua_LuaJNI_ref0},
 
-        {"unref0",           "(JII)V",                                     (void *) Java_mao_commons_jlua_LuaJNI_unref0},
+        {"unref0",          "(JII)V",                                     (void *) Java_mao_commons_jlua_LuaJNI_unref0},
 
-        {"exit0",            "(J)V",                                       (void *) Java_mao_commons_jlua_LuaJNI_exit0},
-
-//        {"error0",           "(JLjava/lang/String;)V",                     (void *) Java_mao_commons_jlua_LuaJNI_error0},
+        {"exit0",           "(J)V",                                       (void *) Java_mao_commons_jlua_LuaJNI_exit0},
 
 };
 
@@ -642,7 +633,6 @@ static jboolean registerNativeMethods(JNIEnv *env) {
 
     return JNI_TRUE;
 }
-
 
 
 void register_luaJNI(JNIEnv *env) {

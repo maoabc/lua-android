@@ -158,7 +158,7 @@ class LuaJNI {
     static native boolean next0(long ptr, int idx);
 
     @FastNative
-    static native void insert0(long ptr, int idx);
+    static native void rotate0(long ptr, int idx, int n);
 
 
     //lauxlib.h

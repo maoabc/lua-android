@@ -32,7 +32,7 @@ public abstract class CJFunction {
     }
 
     //被native层调用
-    public final int call(long luaState) throws Throwable {
+    private int call(long luaState) throws Throwable {
         return call(LuaState.wrap(luaState));
     }
 
