@@ -8,7 +8,6 @@ add_library(jlua SHARED
         fast_lua_jni.c
         lua_jni.c
         ffi_func_jni.c
-        lua_callback_jni.c
         utils.c
         jni_init.c
         lua_android.c

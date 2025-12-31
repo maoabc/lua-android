@@ -500,14 +500,21 @@ Java_mao_commons_jlua_LuaJNI_exit0(JNIEnv *env, jclass clazz, jlong ptr) {
     lua_sethook(l, lua_exit, LUA_MASKCOUNT, 1);
 }
 
+typedef struct {
+    lua_State *L;
+} callback_context;
 
-//static void
-//Java_mao_commons_jlua_LuaJNI_error0(JNIEnv *env, jclass clazz, jlong ptr, jstring errorMsg) {
-//    lua_State *l = jlong_to_ptr(ptr);
-//    char *error = (*env)->GetStringUTFChars(env, errorMsg, NULL);
-//    luaL_error(l, errorMsg);
-//    (*env)->ReleaseStringUTFChars(env, errorMsg, error);
-//}
+
+static jlong
+Java_mao_commons_jlua_LuaJNI_newContext0(JNIEnv *env, jclass clazz, jlong ptr) {
+    lua_State *l = jlong_to_ptr(ptr);
+
+    callback_context *ctx = lua_newuserdata(l, sizeof(callback_context));
+    ctx->L = lua_newthread(l);
+    lua_setuservalue(l, -2);
+    lua_xmove(l, ctx->L, 2);
+    return ptr_to_jlong(ctx->L);
+}
 
 
 #define NELEM(x) ((int) (sizeof(x) / sizeof((x)[0])))
@@ -616,6 +623,8 @@ static const JNINativeMethod methods[] = {
         {"unref0",          "(JII)V",                                     (void *) Java_mao_commons_jlua_LuaJNI_unref0},
 
         {"exit0",           "(J)V",                                       (void *) Java_mao_commons_jlua_LuaJNI_exit0},
+
+        {"newContext0",     "(J)J",                                       (void *) Java_mao_commons_jlua_LuaJNI_newContext0},
 
 };
 

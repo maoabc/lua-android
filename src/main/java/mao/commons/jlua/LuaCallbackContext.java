@@ -19,12 +19,18 @@ public final class LuaCallbackContext implements Closeable {
         if (type != LuaState.LUA_TTABLE && type != LuaState.LUA_TFUNCTION) {
             throw new LuaException("not a table or function");
         }
-        final long[] newL = new long[1];
-        ref = LuaJNI.newContext0(luaState.ptr, newL);
-        this.l = LuaState.wrap(newL[0]);
+        //生成thread对象，同时把它设置为userdata的value
+        final long newL = LuaJNI.newContext0(luaState.ptr);
+        l = LuaState.wrap(newL);
+
+        //userdata 放入私有全局空间，通过ref索引管理它
+        ref = l.ref(LuaJNI.LUA_REGISTRYINDEX);
+
         //栈底放入错误处理函数
         l.pushCFunction(UtilFunctions.traceback());
         l.insert(1);
+
+        //现在用于回调的luaState栈底是错误处理函数，栈顶是回调函数或者table(table中多个回调函数）
 
     }
 
