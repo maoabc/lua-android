@@ -34,8 +34,8 @@ public class LuaStateTest {
         }
     }
 
-    public static void asyncTask(LuaCallbackContext context) {
-        if (!context.l.isFunction(-1)) {
+    public static void asyncTask(LuaState context) {
+        if (!context.isFunction(-1)) {
             throw new IllegalStateException("Not a function");
         }
         new Thread(new Runnable() {
@@ -43,8 +43,9 @@ public class LuaStateTest {
             public void run() {
                 //耗时任务执行
                 //回调lua
-                context.l.pushString("java task finish");
-                context.l.call(1, 1);
+                context.pushString("java task finish");
+                context.call(1, 1);
+                context.close();
 
             }
         }).start();
@@ -61,8 +62,9 @@ public class LuaStateTest {
             final CJFunction asyncFunc = new CJFunction() {
                 @Override
                 protected int call(LuaState luaState) {
-                    final LuaCallbackContext context = new LuaCallbackContext(luaState);
+                    final LuaState context = LuaState.newCallbackContext(luaState);
                     asyncTask(context);
+
                     return 0;
                 }
             };

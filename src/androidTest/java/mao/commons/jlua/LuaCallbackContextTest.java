@@ -33,12 +33,12 @@ public class LuaCallbackContextTest {
         );
         luaState.pcall(0, 1, 0);
         final int type = luaState.type(-1);
-        final LuaCallbackContext context = new LuaCallbackContext(luaState);
-        final int type2 = context.l.type(1);
-        final int type5 = context.l.type(-1);
-        final int top = context.l.getTop();
-        context.l.getField(-1, "callback");
-        final int type1 = context.l.type(-1);
+        final LuaState context = LuaState.newCallbackContext(luaState);
+        final int type2 = context.type(1);
+        final int type5 = context.type(-1);
+        final int top = context.getTop();
+        context.getField(-1, "callback");
+        final int type1 = context.type(-1);
         System.out.println();
     }
 

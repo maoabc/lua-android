@@ -180,5 +180,6 @@ class LuaJNI {
     @FastNative
     static native long newContext0(long ptr);
 
+    static native long findRootThread0(long ptr);
 
 }

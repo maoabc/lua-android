@@ -1,8 +1,14 @@
 package mao.commons.jlua;
 
+import android.util.SparseArray;
+import android.util.SparseLongArray;
+
 import androidx.annotation.NonNull;
+import androidx.collection.LongSparseArray;
 
 import java.io.Closeable;
+import java.lang.ref.WeakReference;
+import java.util.WeakHashMap;
 
 /**
  * 包装c层的lua_State指针，默认不实现生命周期管理，
@@ -48,6 +54,8 @@ public class LuaState implements Closeable {
 
     long ptr;
 
+    private static LongSparseArray<WeakReference<LuaState>> roots = new LongSparseArray<>();
+
 
     protected LuaState(long ptr) {
         this.ptr = ptr;
@@ -86,8 +94,47 @@ public class LuaState implements Closeable {
                 }
             };
         }
+        //记录所有根lua_state
+        roots.put(luaState.ptr, new WeakReference<>(luaState));
+
         luaState.openLibs();
         return luaState;
+    }
+
+    /**
+     * 栈顶是一个table或者函数, table需要包含java方法名及对应的lua回调函数,
+     * 生成一个全新luaState用来调用回调函数
+     *
+     * @param luaState 主线程luaState
+     * @return 新的线程对象
+     */
+    public static LuaState newCallbackContext(LuaState luaState) {
+        final int type = luaState.type(-1);
+        if (type != LuaState.LUA_TTABLE && type != LuaState.LUA_TFUNCTION) {
+            throw new LuaException("not a table or function");
+        }
+        //查找到根lua_state,回调上下文根据它判断是否需要释放资源
+        final long rootPtr = LuaJNI.findRootThread0(luaState.ptr);
+        final WeakReference<LuaState> root = roots.get(rootPtr);
+        if (root == null) {
+            throw new IllegalStateException("Main luaState is closed");
+        }
+
+        //生成thread对象，同时把它设置为userdata的value
+        final long ptr = LuaJNI.newContext0(luaState.ptr);
+        final LuaState newL;
+        if (useCriticalNative) {
+            newL = new CallbackFastLuaState(root, ptr);
+        } else {
+            newL = new CallbackLuaState(root, ptr);
+        }
+        //栈底放入错误处理函数
+        newL.pushCFunction(UtilFunctions.traceback());
+        newL.insert(1);
+
+        //现在用于回调的luaState栈底是错误处理函数，栈顶是回调函数或者table(table中多个回调函数）
+
+        return newL;
     }
 
     /**
@@ -448,6 +495,7 @@ public class LuaState implements Closeable {
         LuaJNI.exit0(ptr);
     }
 
+
     @Override
     public void close() {
     }
@@ -462,6 +510,8 @@ public class LuaState implements Closeable {
 
     protected final void internalClose() {
         synchronized (this) {
+            //删除记录的根lua_state
+            roots.remove(ptr);
             if (ptr != 0) {
                 LuaJNI.close0(ptr);
                 ptr = 0;
@@ -597,6 +647,68 @@ public class LuaState implements Closeable {
         }
     }
 
+
+    // 更严格应该重写所有和底层指针相关的方法，根据root是否可用来提前检测，防止错误调用已退出的lua环境
+    // 太麻烦还是自己保证
+    private static class CallbackLuaState extends LuaState {
+        private final WeakReference<LuaState> root;
+        private int ref;
+
+        protected CallbackLuaState(WeakReference<LuaState> root, long ptr) {
+            super(ptr);
+            this.root = root;
+            //userdata 放入私有全局空间，通过ref索引管理它
+            ref = ref(LuaJNI.LUA_REGISTRYINDEX);
+        }
+
+        @Override
+        public void close() {
+            synchronized (this) {
+                if (ref != LuaState.LUA_NOREF) {
+                    if (root.get() == null) {//根luaState已经被释放则不用再处理
+                        return;
+                    }
+                    unref(LuaJNI.LUA_REGISTRYINDEX, ref);
+                    ref = LuaState.LUA_NOREF;
+                }
+            }
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            close();
+        }
+    }
+
+    private static class CallbackFastLuaState extends FastLuaState {
+        private final WeakReference<LuaState> root;
+        private int ref;
+
+        protected CallbackFastLuaState(WeakReference<LuaState> root, long ptr) {
+            super(ptr);
+            this.root = root;
+            //userdata 放入私有全局空间，通过ref索引管理它
+            ref = ref(LuaJNI.LUA_REGISTRYINDEX);
+        }
+
+        @Override
+        public void close() {
+            synchronized (this) {
+                if (ref != LuaState.LUA_NOREF) {
+                    if (root.get() == null) {//根luaState已经被释放则不用再处理
+                        return;
+                    }
+                    unref(LuaJNI.LUA_REGISTRYINDEX, ref);
+                    ref = LuaState.LUA_NOREF;
+                }
+            }
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            close();
+        }
+    }
 
     public interface TableIterator {
         void iter(LuaState l);

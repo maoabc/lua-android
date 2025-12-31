@@ -516,6 +516,21 @@ Java_mao_commons_jlua_LuaJNI_newContext0(JNIEnv *env, jclass clazz, jlong ptr) {
     return ptr_to_jlong(ctx->L);
 }
 
+static jlong
+Java_mao_commons_jlua_LuaJNI_findRootThread0(JNIEnv *env, jclass clazz, jlong ptr) {
+    lua_State *current = jlong_to_ptr(ptr);
+    while (1) {
+        lua_rawgeti(current, LUA_REGISTRYINDEX, LUA_RIDX_MAINTHREAD);
+        lua_State *main = lua_tothread(current, -1);
+        lua_pop(current, 1);
+
+        if (main == NULL || main == current) {
+            return ptr_to_jlong(current);  // 已经是最顶层
+        }
+        current = main;
+    }
+}
+
 
 #define NELEM(x) ((int) (sizeof(x) / sizeof((x)[0])))
 
@@ -625,6 +640,8 @@ static const JNINativeMethod methods[] = {
         {"exit0",           "(J)V",                                       (void *) Java_mao_commons_jlua_LuaJNI_exit0},
 
         {"newContext0",     "(J)J",                                       (void *) Java_mao_commons_jlua_LuaJNI_newContext0},
+
+        {"findRootThread0", "(J)J",                                       (void *) Java_mao_commons_jlua_LuaJNI_findRootThread0},
 
 };
 
