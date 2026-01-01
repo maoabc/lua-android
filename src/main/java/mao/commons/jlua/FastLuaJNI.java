@@ -66,5 +66,9 @@ class FastLuaJNI {
     @CriticalNative
     static native void rotate0(long ptr, int idx, int n);
 
+    @CriticalNative
+    static native long findRootThread0(long ptr);
+
+
 
 }

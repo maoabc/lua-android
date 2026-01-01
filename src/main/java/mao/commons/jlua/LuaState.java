@@ -1,14 +1,11 @@
 package mao.commons.jlua;
 
-import android.util.SparseArray;
-import android.util.SparseLongArray;
 
 import androidx.annotation.NonNull;
 import androidx.collection.LongSparseArray;
 
 import java.io.Closeable;
 import java.lang.ref.WeakReference;
-import java.util.WeakHashMap;
 
 /**
  * 包装c层的lua_State指针，默认不实现生命周期管理，
@@ -54,7 +51,7 @@ public class LuaState implements Closeable {
 
     long ptr;
 
-    private static LongSparseArray<WeakReference<LuaState>> roots = new LongSparseArray<>();
+    private static final LongSparseArray<WeakReference<LuaState>> roots = new LongSparseArray<>();
 
 
     protected LuaState(long ptr) {
@@ -113,11 +110,11 @@ public class LuaState implements Closeable {
         if (type != LuaState.LUA_TTABLE && type != LuaState.LUA_TFUNCTION) {
             throw new LuaException("not a table or function");
         }
-        //查找到根lua_state,回调上下文根据它判断是否需要释放资源
-        final long rootPtr = LuaJNI.findRootThread0(luaState.ptr);
-        final WeakReference<LuaState> root = roots.get(rootPtr);
+
+        // 查找到根lua_state,回调上下文根据它判断是否需要释放资源
+        final WeakReference<LuaState> root = roots.get(LuaJNI.findRootThread0(luaState.ptr));
         if (root == null) {
-            throw new IllegalStateException("Main luaState is closed");
+            throw new LuaException("root lua_state closed");
         }
 
         //生成thread对象，同时把它设置为userdata的value
@@ -449,17 +446,11 @@ public class LuaState implements Closeable {
         LuaJNI.setI0(ptr, idx, n);
     }
 
-    public int getField(int idx, String key) {
-        if (key == null) {
-            throw new NullPointerException("key is null");
-        }
+    public int getField(int idx, @NonNull String key) {
         return LuaJNI.getField0(ptr, idx, key);
     }
 
-    public void setField(int idx, String key) {
-        if (key == null) {
-            throw new NullPointerException("key is null");
-        }
+    public void setField(int idx, @NonNull String key) {
         LuaJNI.setField0(ptr, idx, key);
     }
 
@@ -507,6 +498,26 @@ public class LuaState implements Closeable {
     public void unref(int t, int ref) {
         LuaJNI.unref0(ptr, t, ref);
     }
+
+    public boolean isValid() {
+        return ptr != 0;
+    }
+
+//    public final boolean isRootValid() {
+//        if (ptr == 0) {
+//            return false;
+//        }
+//        // 有问题,可能需要创建时把root对象放置好，这样能直接判断环境是否有效
+//        // 这里如果root被释放，然后用其他线程去查找root会出错
+//        // 所以创建时获得root才能保证正确，但是会额外增加wrap的开销感觉没必要
+//        final long rootPtr = LuaJNI.findRootThread0(ptr);
+//        final WeakReference<LuaState> root = roots.get(rootPtr);
+//        if (root == null || root.get() == null || root.get().ptr == 0) {
+//            return false;
+//        }
+//        return true;
+//    }
+
 
     protected final void internalClose() {
         synchronized (this) {
@@ -662,10 +673,15 @@ public class LuaState implements Closeable {
         }
 
         @Override
+        public boolean isValid() {
+            return !(root.get() == null || root.get().ptr == 0);
+        }
+
+        @Override
         public void close() {
             synchronized (this) {
                 if (ref != LuaState.LUA_NOREF) {
-                    if (root.get() == null) {//根luaState已经被释放则不用再处理
+                    if (root.get() == null || root.get().ptr == 0) {//根luaState已经被释放则不用再处理
                         return;
                     }
                     unref(LuaJNI.LUA_REGISTRYINDEX, ref);
@@ -692,10 +708,15 @@ public class LuaState implements Closeable {
         }
 
         @Override
+        public boolean isValid() {
+            return !(root.get() == null || root.get().ptr == 0);
+        }
+
+        @Override
         public void close() {
             synchronized (this) {
                 if (ref != LuaState.LUA_NOREF) {
-                    if (root.get() == null) {//根luaState已经被释放则不用再处理
+                    if (root.get() == null || root.get().ptr == 0) {//根luaState已经被释放则不用再处理
                         return;
                     }
                     unref(LuaJNI.LUA_REGISTRYINDEX, ref);
